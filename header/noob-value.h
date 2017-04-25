@@ -17,6 +17,7 @@ class NoobValue {
   NoobValue();
   ~NoobValue();
   NoobType NoobGetType();
+  void NoobSetType(NoobType type);
   bool NoobGetBoolean();
   void NoobSetBoolean(bool boolean);
   double NoobGetNumber();
@@ -26,7 +27,10 @@ class NoobValue {
   void NoobSetString(std::string *str);
   void NoobSetString(std::string &str);
   void NoobSetString(const char *str, size_t length);
-  void NoobSetType(NoobType type);
+  NoobValue* NoobGetArrayElement(size_t index);
+  size_t NoobGetArraySize();
+  //void NoobSetArray(std::vector<NoobValue *> *vec);
+  //void NoobSetArray(std::vector<NoobValue *> &vec);
   NoobReturnValue NoobParse(const char *json);
 
  private:
@@ -36,9 +40,11 @@ class NoobValue {
   NoobReturnValue NoobParseLiteral(const char* literal, NoobType type);
   NoobReturnValue NoobParseNumber();
   NoobReturnValue NoobParseString();
+  NoobReturnValue NoobParseArray();
 
 
   union {
+    std::vector<NoobValue *> *_array;
     std::string *_string;
     double _number;
   } _value;

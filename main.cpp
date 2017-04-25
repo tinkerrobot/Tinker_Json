@@ -124,7 +124,41 @@ static void TestParseString() {
   TestString("\" \\ / \b \f \n \r \t", "\"\\\" \\\\ \\/ \\b \\f \\n \\r \\t\"");
 }
 
-static void TestParseIllegal() {
+static void TestParseArray() {
+  NoobValue v;
+  TestEqualInt(kNoobOk, v.NoobParse("[ ]"));
+  TestEqualInt(kNoobArray, v.NoobGetType());
+  TestEqualInt(0, v.NoobGetArraySize());
+
+  TestEqualInt(kNoobOk, v.NoobParse("[ null , false , true , 123 , \"abc\" ]"));
+  TestEqualInt(kNoobArray, v.NoobGetType());
+  TestEqualInt(5, v.NoobGetArraySize());
+  TestEqualInt(kNoobNull,   v.NoobGetArrayElement(0)->NoobGetType());
+  TestEqualInt(kNoobFalse,  v.NoobGetArrayElement(1)->NoobGetType());
+  TestEqualInt(kNoobTrue,   v.NoobGetArrayElement(2)->NoobGetType());
+  TestEqualInt(kNoobNumber, v.NoobGetArrayElement(3)->NoobGetType());
+  TestEqualInt(kNoobString, v.NoobGetArrayElement(4)->NoobGetType());
+  TestEqualDouble(123.0, v.NoobGetArrayElement(3)->NoobGetNumber());
+  TestEqualString("abc",
+    v.NoobGetArrayElement(4)->NoobGetString()->c_str(),
+    v.NoobGetArrayElement(4)->NoobGetStringLength());
+
+  TestEqualInt(kNoobOk, v.NoobParse("[ [ ] , [ 0 ] , [ 0 , 1 ] , [ 0 , 1 , 2 ] ]"));
+  TestEqualInt(kNoobArray, v.NoobGetType());
+  TestEqualInt(4, v.NoobGetArraySize());
+  for (int i = 0; i < 4; i++) {
+    NoobValue* a = v.NoobGetArrayElement(i);
+    TestEqualInt(kNoobArray, a->NoobGetType());
+    TestEqualInt(i, a->NoobGetArraySize());
+    for (int j = 0; j < i; j++) {
+      NoobValue* e = a->NoobGetArrayElement(j);
+      TestEqualInt(kNoobNumber, e->NoobGetType());
+      TestEqualDouble((double)j, e->NoobGetNumber());
+    }
+  }
+}
+
+static void TestParseIllegalLiteral() {
   gCurrentTest = "Test Expect Value";
   TestError(kNoobExpectValue, "");
   TestError(kNoobExpectValue, " ");
@@ -165,13 +199,22 @@ static void TestParseIllegalString() {
   TestError(kNoobInvalidStringChar, "\"\x1F\"");
 }
 
+static void TestParseIllegalArray() {
+  TestError(kNoobMissCommaOrSquareBracket, "[1");
+  TestError(kNoobMissCommaOrSquareBracket, "[1}");
+  TestError(kNoobMissCommaOrSquareBracket, "[1 2");
+  TestError(kNoobMissCommaOrSquareBracket, "[[]");
+}
+
 void MainTest() {
   TestParseLiteral();
   TestParseNumber();
   TestParseString();
-  TestParseIllegal();
+  TestParseArray();
+  TestParseIllegalLiteral();
   TestParseIllegalNumber();
   TestParseIllegalString();
+  TestParseIllegalArray();
 }
 
 int main() {
