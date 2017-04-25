@@ -35,6 +35,13 @@ int gTestPass = 0;
     TestEqualBase((expect) == (actual), expect, actual);\
   } while(0)
 
+#define TestEqualString(expect, actual, length) \
+  do {\
+    TestEqualBase(\
+      sizeof(expect) - 1 == length && memcmp(expect, actual, length) == 0,\
+      expect, actual);\
+  } while(0)
+
 #define TestNumber(expect, json)\
   do {\
     NoobValue v;\
@@ -50,6 +57,17 @@ int gTestPass = 0;
     TestEqualInt(error, v.NoobParse(json));\
     TestEqualInt(kNoobNull, v.NoobGetType());\
   } while(0)
+
+#define TestString(expect, json)\
+  do {\
+    NoobValue v;\
+    TestEqualInt(kNoobOk, v.NoobParse(json));\
+    TestEqualInt(kNoobString, v.NoobGetType());\
+    TestEqualString(expect, v.NoobGetString()->c_str(), v.NoobGetStringLength());\
+  } while(0)
+
+#define TestTrue(actual) TestEqualBase((actual) != 0, "true", "false")
+#define TestFalse(actual) TestEqualBase((actual) == 0, "false", "true")
 
 /*
  * Test cases.
@@ -99,6 +117,13 @@ static void TestParseNumber() {
   TestNumber(-1.7976931348623157e+308, "-1.7976931348623157e+308");
 };
 
+static void TestParseString() {
+  TestString("", "\"\"");
+  TestString("Hello", "\"Hello\"");
+  TestString("Hello\nWorld", "\"Hello\\nWorld\"");
+  TestString("\" \\ / \b \f \n \r \t", "\"\\\" \\\\ \\/ \\b \\f \\n \\r \\t\"");
+}
+
 static void TestParseIllegal() {
   gCurrentTest = "Test Expect Value";
   TestError(kNoobExpectValue, "");
@@ -129,11 +154,24 @@ static void TestParseIllegalNumber() {
   TestError(kNoobNotSigular, "0x123");
 }
 
+static void TestParseIllegalString() {
+  TestError(kNoobMissQuotationMark, "\"");
+  TestError(kNoobMissQuotationMark, "\"abc");
+  TestError(kNoobInvalidStringEscape, "\"\\v\"");
+  TestError(kNoobInvalidStringEscape, "\"\\'\"");
+  TestError(kNoobInvalidStringEscape, "\"\\0\"");
+  TestError(kNoobInvalidStringEscape, "\"\\x12\"");
+  TestError(kNoobInvalidStringChar, "\"\x01\"");
+  TestError(kNoobInvalidStringChar, "\"\x1F\"");
+}
+
 void MainTest() {
   TestParseLiteral();
-  TestParseIllegal();
   TestParseNumber();
+  TestParseString();
+  TestParseIllegal();
   TestParseIllegalNumber();
+  TestParseIllegalString();
 }
 
 int main() {

@@ -8,6 +8,7 @@
 #ifndef NOOB_JSON_PARSER_NOOB_VALUE_H
 #define NOOB_JSON_PARSER_NOOB_VALUE_H
 
+#include "std-header.h"
 #include "noob-enum.h"
 #include "noob-context.h"
 
@@ -20,18 +21,25 @@ class NoobValue {
   void NoobSetBoolean(bool boolean);
   double NoobGetNumber();
   void NoobSetNumber(double number);
+  const std::string* NoobGetString();
+  size_t NoobGetStringLength();
+  void NoobSetString(std::string *str);
+  void NoobSetString(std::string &str);
+  void NoobSetString(const char *str, size_t length);
   void NoobSetType(NoobType type);
   NoobReturnValue NoobParse(const char *json);
 
  private:
+  void NoobFree();
   void NoobParseWhitespace();
   NoobReturnValue NoobParseValue();
   NoobReturnValue NoobParseLiteral(const char* literal, NoobType type);
-  NoobReturnValue NoobValidateNumber();
   NoobReturnValue NoobParseNumber();
+  NoobReturnValue NoobParseString();
 
 
   union {
+    std::string *_string;
     double _number;
   } _value;
   NoobType _type;

@@ -15,9 +15,11 @@
 NoobValue::NoobValue() {
   _type = kNoobNull;
   _context = nullptr;
+  _value._string = nullptr;
 }
 
 NoobValue::~NoobValue() {
+  NoobFree();
   delete _context;
   _context = nullptr;
 }
@@ -42,7 +44,7 @@ bool NoobValue::NoobGetBoolean() {
 }
 
 void NoobValue::NoobSetBoolean(bool boolean) {
-  //NoobFree();
+  NoobFree();
   _type = (boolean ? kNoobTrue : kNoobFalse);
 }
 
@@ -56,9 +58,45 @@ double NoobValue::NoobGetNumber() {
 }
 
 void NoobValue::NoobSetNumber(double number) {
-  //NoobFree();
+  NoobFree();
   _value._number = number;
   _type = kNoobNumber;
+}
+
+const std::string* NoobValue::NoobGetString() {
+  if(_type == kNoobString) {
+    return _value._string;
+  } else {
+    printf("ERROR: Try to access the string value of a non-string object!\n");
+    exit(-1);
+  }
+}
+
+size_t NoobValue::NoobGetStringLength() {
+  if(_type == kNoobString) {
+    return (_value._string)->length();
+  } else {
+    printf("ERROR: Try to access the string length of a non-string object!\n");
+    exit(-1);
+  }
+}
+
+void NoobValue::NoobSetString(std::string *str) {
+  NoobFree();
+  _value._string = new std::string(*str);
+  _type = kNoobString;
+}
+
+void NoobValue::NoobSetString(std::string &str) {
+  NoobFree();
+  _value._string = new std::string(str);
+  _type = kNoobString;
+}
+
+void NoobValue::NoobSetString(const char *str, size_t length) {
+  NoobFree();
+  _value._string = new std::string(str, length);
+  _type = kNoobString;
 }
 
 NoobReturnValue NoobValue::NoobParse(const char *json) {
@@ -83,6 +121,14 @@ NoobReturnValue NoobValue::NoobParse(const char *json) {
  * Private functions
  */
 
+void NoobValue::NoobFree() {
+  if(_type == kNoobString) {
+    delete _value._string;
+    _value._string = nullptr;
+  }
+  _type = kNoobNull;
+}
+
 void NoobValue::NoobParseWhitespace() {
   const char *pointer = _context->NoobGetJson();
   while(*pointer == ' ' ||
@@ -104,6 +150,9 @@ NoobReturnValue NoobValue::NoobParseValue() {
     }
     case 'f': {
       return NoobParseLiteral("false", kNoobFalse);
+    }
+    case '"': {
+      return NoobParseString();
     }
     case '\0': {
       return kNoobExpectValue;
@@ -131,11 +180,6 @@ inline bool IsDigit(char ch) {
 
 inline bool IsDigit1To9(char ch) {
   return (ch >= '1' && ch <= '9');
-}
-
-NoobReturnValue NoobValue::NoobValidateNumber() {
-
-  return kNoobOk;
 }
 
 NoobReturnValue NoobValue::NoobParseNumber() {
@@ -185,4 +229,43 @@ NoobReturnValue NoobValue::NoobParseNumber() {
   _type = kNoobNumber;
   _context->NoobSetJson(pointer);
   return kNoobOk;
+}
+
+NoobReturnValue NoobValue::NoobParseString() {
+  _context->NoobMoveForward(1);
+  std::string buffer = "";
+  const char *pointer = _context->NoobGetJson();
+  while(true) {
+    char ch = *pointer++;
+    switch(ch) {
+      case '\"': {
+        NoobSetString(buffer);
+        _context->NoobSetJson(pointer);
+        return kNoobOk;
+      }
+      case '\0': {
+        return kNoobMissQuotationMark;
+      }
+      case '\\': {
+        switch(*pointer++) {
+          case '\"': buffer.push_back('\"'); break;
+          case '\\': buffer.push_back('\\'); break;
+          case '/':  buffer.push_back('/' ); break;
+          case 'b':  buffer.push_back('\b'); break;
+          case 'f':  buffer.push_back('\f'); break;
+          case 'n':  buffer.push_back('\n'); break;
+          case 'r':  buffer.push_back('\r'); break;
+          case 't':  buffer.push_back('\t'); break;
+          default: return kNoobInvalidStringEscape;
+        }
+        break;
+      }
+      default: {
+        if((unsigned char)ch < 0x20) {
+          return kNoobInvalidStringChar;
+        }
+        buffer.push_back(ch);
+      }
+    }
+  }
 }
