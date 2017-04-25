@@ -5,8 +5,12 @@ set(CMAKE_CXX_STANDARD 11)
 
 set(SOURCE_FILES
   header/std-header.h
+  header/noob-enum.h
+  header/noob-value.h
+  header/noob-context.h
 
   main.cpp
-  source/test-function.cpp
+  source/noob-value.cpp
+  source/noob-context.cpp
   )
 add_executable(Noob_Json_Parser ${SOURCE_FILES})

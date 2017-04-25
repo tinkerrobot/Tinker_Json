@@ -14,5 +14,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
+#include <vector>
 
 #endif //NOOB_JSON_PARSER_STD_HEADER_H
