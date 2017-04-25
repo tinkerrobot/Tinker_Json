@@ -24,7 +24,7 @@ NoobValue::~NoobValue() {
   _context = nullptr;
 }
 
-NoobType NoobValue::NoobGetType() {
+NoobType NoobValue::NoobGetType() const {
   return _type;
 }
 
@@ -32,7 +32,7 @@ void NoobValue::NoobSetType(NoobType type) {
   _type = type;
 }
 
-bool NoobValue::NoobGetBoolean() {
+bool NoobValue::NoobGetBoolean() const {
   if(_type == kNoobTrue) {
     return true;
   } else if(_type == kNoobFalse) {
@@ -43,12 +43,7 @@ bool NoobValue::NoobGetBoolean() {
   }
 }
 
-void NoobValue::NoobSetBoolean(bool boolean) {
-  NoobFree();
-  _type = (boolean ? kNoobTrue : kNoobFalse);
-}
-
-double NoobValue::NoobGetNumber() {
+double NoobValue::NoobGetNumber() const {
   if(_type == kNoobNumber) {
     return _value._number;
   } else {
@@ -57,13 +52,7 @@ double NoobValue::NoobGetNumber() {
   }
 }
 
-void NoobValue::NoobSetNumber(double number) {
-  NoobFree();
-  _value._number = number;
-  _type = kNoobNumber;
-}
-
-const std::string* NoobValue::NoobGetString() {
+const std::string* NoobValue::NoobGetString() const {
   if(_type == kNoobString) {
     return _value._string;
   } else {
@@ -72,7 +61,7 @@ const std::string* NoobValue::NoobGetString() {
   }
 }
 
-size_t NoobValue::NoobGetStringLength() {
+size_t NoobValue::NoobGetStringLength() const {
   if(_type == kNoobString) {
     return (_value._string)->length();
   } else {
@@ -81,25 +70,7 @@ size_t NoobValue::NoobGetStringLength() {
   }
 }
 
-void NoobValue::NoobSetString(std::string *str) {
-  NoobFree();
-  _value._string = new std::string(*str);
-  _type = kNoobString;
-}
-
-void NoobValue::NoobSetString(std::string &str) {
-  NoobFree();
-  _value._string = new std::string(str);
-  _type = kNoobString;
-}
-
-void NoobValue::NoobSetString(const char *str, size_t length) {
-  NoobFree();
-  _value._string = new std::string(str, length);
-  _type = kNoobString;
-}
-
-NoobValue* NoobValue::NoobGetArrayElement(size_t index) {
+NoobValue* NoobValue::NoobGetArrayElement(size_t index) const {
   if(_type == kNoobArray) {
     return (_value._array)->at(index);
   } else {
@@ -108,7 +79,16 @@ NoobValue* NoobValue::NoobGetArrayElement(size_t index) {
   }
 }
 
-size_t NoobValue::NoobGetArraySize() {
+NoobValue* NoobValue::operator[](size_t index) const {
+  if(_type == kNoobArray) {
+    return (_value._array)->at(index);
+  } else {
+    printf("ERROR: Try to access the element of a non-array object!\n");
+    exit(-1);
+  }
+}
+
+size_t NoobValue::NoobGetArraySize() const {
   if(_type == kNoobArray) {
     return (_value._array)->size();
   } else {
@@ -155,6 +135,35 @@ void NoobValue::NoobFree() {
     _value._array = nullptr;
   }
   _type = kNoobNull;
+}
+
+void NoobValue::NoobSetBoolean(bool boolean) {
+  NoobFree();
+  _type = (boolean ? kNoobTrue : kNoobFalse);
+}
+
+void NoobValue::NoobSetNumber(double number) {
+  NoobFree();
+  _value._number = number;
+  _type = kNoobNumber;
+}
+
+void NoobValue::NoobSetString(std::string *str) {
+  NoobFree();
+  _value._string = new std::string(*str);
+  _type = kNoobString;
+}
+
+void NoobValue::NoobSetString(std::string &str) {
+  NoobFree();
+  _value._string = new std::string(str);
+  _type = kNoobString;
+}
+
+void NoobValue::NoobSetString(const char *str, size_t length) {
+  NoobFree();
+  _value._string = new std::string(str, length);
+  _type = kNoobString;
 }
 
 void NoobValue::NoobParseWhitespace() {

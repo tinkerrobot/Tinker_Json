@@ -75,7 +75,6 @@ int gTestPass = 0;
 
 static void TestParseLiteral() {
   NoobValue v;
-  gCurrentTest = "Test Literal";
   TestEqualInt(kNoobOk, v.NoobParse("null"));
   TestEqualInt(kNoobNull, v.NoobGetType());
   TestEqualInt(kNoobOk, v.NoobParse("true"));
@@ -85,7 +84,6 @@ static void TestParseLiteral() {
 }
 
 static void TestParseNumber() {
-  gCurrentTest = "Test Number";
   TestNumber(0.0, "0");
   TestNumber(0.0, "-0");
   TestNumber(0.0, "-0.0");
@@ -133,25 +131,25 @@ static void TestParseArray() {
   TestEqualInt(kNoobOk, v.NoobParse("[ null , false , true , 123 , \"abc\" ]"));
   TestEqualInt(kNoobArray, v.NoobGetType());
   TestEqualInt(5, v.NoobGetArraySize());
-  TestEqualInt(kNoobNull,   v.NoobGetArrayElement(0)->NoobGetType());
-  TestEqualInt(kNoobFalse,  v.NoobGetArrayElement(1)->NoobGetType());
-  TestEqualInt(kNoobTrue,   v.NoobGetArrayElement(2)->NoobGetType());
-  TestEqualInt(kNoobNumber, v.NoobGetArrayElement(3)->NoobGetType());
-  TestEqualInt(kNoobString, v.NoobGetArrayElement(4)->NoobGetType());
-  TestEqualDouble(123.0, v.NoobGetArrayElement(3)->NoobGetNumber());
+  TestEqualInt(kNoobNull,   v[0]->NoobGetType());
+  TestEqualInt(kNoobFalse,  v[1]->NoobGetType());
+  TestEqualInt(kNoobTrue,   v[2]->NoobGetType());
+  TestEqualInt(kNoobNumber, v[3]->NoobGetType());
+  TestEqualInt(kNoobString, v[4]->NoobGetType());
+  TestEqualDouble(123.0, v[3]->NoobGetNumber());
   TestEqualString("abc",
-    v.NoobGetArrayElement(4)->NoobGetString()->c_str(),
-    v.NoobGetArrayElement(4)->NoobGetStringLength());
+    v[4]->NoobGetString()->c_str(),
+    v[4]->NoobGetStringLength());
 
   TestEqualInt(kNoobOk, v.NoobParse("[ [ ] , [ 0 ] , [ 0 , 1 ] , [ 0 , 1 , 2 ] ]"));
   TestEqualInt(kNoobArray, v.NoobGetType());
   TestEqualInt(4, v.NoobGetArraySize());
   for (int i = 0; i < 4; i++) {
-    NoobValue* a = v.NoobGetArrayElement(i);
+    NoobValue* a = v[i];
     TestEqualInt(kNoobArray, a->NoobGetType());
     TestEqualInt(i, a->NoobGetArraySize());
     for (int j = 0; j < i; j++) {
-      NoobValue* e = a->NoobGetArrayElement(j);
+      NoobValue *e = (*a)[j];
       TestEqualInt(kNoobNumber, e->NoobGetType());
       TestEqualDouble((double)j, e->NoobGetNumber());
     }
@@ -159,15 +157,12 @@ static void TestParseArray() {
 }
 
 static void TestParseIllegalLiteral() {
-  gCurrentTest = "Test Expect Value";
   TestError(kNoobExpectValue, "");
   TestError(kNoobExpectValue, " ");
 
-  gCurrentTest = "Test Invalid Value";
   TestError(kNoobInvalidValue, "nul");
   TestError(kNoobInvalidValue, "?");
 
-  gCurrentTest = "Test Root Not Sigular";
   TestError(kNoobNotSigular, "null x");
 }
 
@@ -219,6 +214,10 @@ void MainTest() {
 
 int main() {
   MainTest();
-  printf("%d/%d (%3.2f%%) Passed\n", gTestPass, gTestTotal, gTestPass * 100.0 / gTestTotal);
+  printf("%d/%d (%3.2f%%) Passed\n",
+    gTestPass,
+    gTestTotal,
+    gTestPass * 100.0 / gTestTotal
+  );
   return gResult;
 }

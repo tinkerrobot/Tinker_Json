@@ -16,32 +16,36 @@ class NoobValue {
  public:
   NoobValue();
   ~NoobValue();
-  NoobType NoobGetType();
+
+  NoobType NoobGetType() const;
   void NoobSetType(NoobType type);
-  bool NoobGetBoolean();
-  void NoobSetBoolean(bool boolean);
-  double NoobGetNumber();
-  void NoobSetNumber(double number);
-  const std::string* NoobGetString();
-  size_t NoobGetStringLength();
-  void NoobSetString(std::string *str);
-  void NoobSetString(std::string &str);
-  void NoobSetString(const char *str, size_t length);
-  NoobValue* NoobGetArrayElement(size_t index);
-  size_t NoobGetArraySize();
-  //void NoobSetArray(std::vector<NoobValue *> *vec);
-  //void NoobSetArray(std::vector<NoobValue *> &vec);
+  bool NoobGetBoolean() const;
+  double NoobGetNumber() const;
+  const std::string* NoobGetString() const;
+  size_t NoobGetStringLength() const;
+  NoobValue* NoobGetArrayElement(size_t index) const;
+  NoobValue* operator[](size_t index) const;
+  size_t NoobGetArraySize() const;
+
   NoobReturnValue NoobParse(const char *json);
 
  private:
   void NoobFree();
+
+  void NoobSetBoolean(bool boolean);
+  void NoobSetNumber(double number);
+  void NoobSetString(std::string *str);
+  void NoobSetString(std::string &str);
+  void NoobSetString(const char *str, size_t length);
+  // void NoobSetArray(std::vector<NoobValue *> *vec);
+  // void NoobSetArray(std::vector<NoobValue *> &vec);
+
   void NoobParseWhitespace();
   NoobReturnValue NoobParseValue();
   NoobReturnValue NoobParseLiteral(const char* literal, NoobType type);
   NoobReturnValue NoobParseNumber();
   NoobReturnValue NoobParseString();
   NoobReturnValue NoobParseArray();
-
 
   union {
     std::vector<NoobValue *> *_array;
