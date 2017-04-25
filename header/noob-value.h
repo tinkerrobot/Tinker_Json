@@ -16,6 +16,10 @@ class NoobValue {
   NoobValue();
   ~NoobValue();
   NoobType NoobGetType();
+  bool NoobGetBoolean();
+  void NoobSetBoolean(bool boolean);
+  double NoobGetNumber();
+  void NoobSetNumber(double number);
   void NoobSetType(NoobType type);
   NoobReturnValue NoobParse(const char *json);
 
@@ -23,7 +27,13 @@ class NoobValue {
   void NoobParseWhitespace();
   NoobReturnValue NoobParseValue();
   NoobReturnValue NoobParseLiteral(const char* literal, NoobType type);
+  NoobReturnValue NoobValidateNumber();
+  NoobReturnValue NoobParseNumber();
 
+
+  union {
+    double _number;
+  } _value;
   NoobType _type;
   NoobContext *_context;
 };

@@ -5,7 +5,7 @@
 /*
  * Global Variables, store the results of the tests.
  */
-int gCurrentTest = 0;
+std::string gCurrentTest = "";
 int gResult = 0;
 int gTestTotal = 0;
 int gTestPass = 0;
@@ -13,33 +13,51 @@ int gTestPass = 0;
 /*
  * Test functions.
  */
-template <typename T>
-bool TestEqualBase(bool equality, T expect, T actual) {
-  gCurrentTest++;
-  gTestTotal++;
-  if(equality) {
-    gTestPass++;
-  } else {
-    std::cerr << "LINE: " << gCurrentTest
-              << " >> Expect: " << expect
-              << " Actual: " << actual
-              << std::endl;
-    gResult++;
-  }
-  return equality;
-}
+#define TestEqualBase(equality, expect, actual)\
+  do {\
+    gTestTotal++;\
+    if (equality)\
+      gTestPass++;\
+    else {\
+      std::cout << __FILE__ << ":" << __LINE__ << " > Expect: " << expect << " Actual: " << actual << std::endl;\
+      gResult++;\
+    }\
+  } while(0)
 
-bool TestEqualInt(int expect, int actual) {
-  return TestEqualBase<int>((expect == actual), expect, actual);
-}
+
+#define TestEqualInt(expect, actual)\
+  do {\
+    TestEqualBase((expect) == (actual), expect, actual);\
+  } while(0)
+
+#define TestEqualDouble(expect, actual)\
+  do {\
+    TestEqualBase((expect) == (actual), expect, actual);\
+  } while(0)
+
+#define TestNumber(expect, json)\
+  do {\
+    NoobValue v;\
+    TestEqualInt(kNoobOk, v.NoobParse(json));\
+    TestEqualInt(kNoobNumber, v.NoobGetType());\
+    TestEqualDouble(expect, v.NoobGetNumber());\
+  } while(0)
+
+#define TestError(error, json)\
+  do {\
+    NoobValue v;\
+    v.NoobSetType(kNoobFalse);\
+    TestEqualInt(error, v.NoobParse(json));\
+    TestEqualInt(kNoobNull, v.NoobGetType());\
+  } while(0)
 
 /*
  * Test cases.
  */
 
-void TestLiteral() {
+static void TestParseLiteral() {
   NoobValue v;
-  gCurrentTest = __LINE__;
+  gCurrentTest = "Test Literal";
   TestEqualInt(kNoobOk, v.NoobParse("null"));
   TestEqualInt(kNoobNull, v.NoobGetType());
   TestEqualInt(kNoobOk, v.NoobParse("true"));
@@ -48,45 +66,74 @@ void TestLiteral() {
   TestEqualInt(kNoobFalse, v.NoobGetType());
 }
 
-void TestIllegal() {
-  NoobValue v;
+static void TestParseNumber() {
+  gCurrentTest = "Test Number";
+  TestNumber(0.0, "0");
+  TestNumber(0.0, "-0");
+  TestNumber(0.0, "-0.0");
+  TestNumber(1.0, "1");
+  TestNumber(-1.0, "-1");
+  TestNumber(1.5, "1.5");
+  TestNumber(-1.5, "-1.5");
+  TestNumber(3.1416, "3.1416");
+  TestNumber(1E10, "1E10");
+  TestNumber(1e10, "1e10");
+  TestNumber(1E+10, "1E+10");
+  TestNumber(1E-10, "1E-10");
+  TestNumber(-1E10, "-1E10");
+  TestNumber(-1e10, "-1e10");
+  TestNumber(-1E+10, "-1E+10");
+  TestNumber(-1E-10, "-1E-10");
+  TestNumber(1.234E+10, "1.234E+10");
+  TestNumber(1.234E-10, "1.234E-10");
+  TestNumber(0.0, "1e-10000"); /* must underflow */
 
-  /*
-   * Expect Value
-   */
-  v.NoobSetType(kNoobFalse);
-  gCurrentTest = __LINE__;
-  TestEqualInt(kNoobExpectValue, v.NoobParse(""));
-  TestEqualInt(kNoobNull, v.NoobGetType());
-  v.NoobSetType(kNoobFalse);
-  gCurrentTest = __LINE__;
-  TestEqualInt(kNoobExpectValue, v.NoobParse(" "));
-  TestEqualInt(kNoobNull, v.NoobGetType());
+  TestNumber(1.0000000000000002, "1.0000000000000002"); /* the smallest number > 1 */
+  TestNumber( 4.9406564584124654e-324, "4.9406564584124654e-324"); /* minimum denormal */
+  TestNumber(-4.9406564584124654e-324, "-4.9406564584124654e-324");
+  TestNumber( 2.2250738585072009e-308, "2.2250738585072009e-308");  /* Max subnormal double */
+  TestNumber(-2.2250738585072009e-308, "-2.2250738585072009e-308");
+  TestNumber( 2.2250738585072014e-308, "2.2250738585072014e-308");  /* Min normal positive double */
+  TestNumber(-2.2250738585072014e-308, "-2.2250738585072014e-308");
+  TestNumber( 1.7976931348623157e+308, "1.7976931348623157e+308");  /* Max double */
+  TestNumber(-1.7976931348623157e+308, "-1.7976931348623157e+308");
+};
 
-  /*
-   * Invalid Value
-   */
-  v.NoobSetType(kNoobFalse);
-  gCurrentTest = __LINE__;
-  TestEqualInt(kNoobInvalidValue, v.NoobParse("nul"));
-  TestEqualInt(kNoobNull, v.NoobGetType());
-  v.NoobSetType(kNoobFalse);
-  gCurrentTest = __LINE__;
-  TestEqualInt(kNoobInvalidValue, v.NoobParse("?"));
-  TestEqualInt(kNoobNull, v.NoobGetType());
+static void TestParseIllegal() {
+  gCurrentTest = "Test Expect Value";
+  TestError(kNoobExpectValue, "");
+  TestError(kNoobExpectValue, " ");
 
-  /*
-   * Root not sigular
-   */
-  v.NoobSetType(kNoobFalse);
-  gCurrentTest = __LINE__;
-  TestEqualInt(kNoobNotSigular, v.NoobParse("null x"));
-  TestEqualInt(kNoobNull, v.NoobGetType());
+  gCurrentTest = "Test Invalid Value";
+  TestError(kNoobInvalidValue, "nul");
+  TestError(kNoobInvalidValue, "?");
+
+  gCurrentTest = "Test Root Not Sigular";
+  TestError(kNoobNotSigular, "null x");
+}
+
+static void TestParseIllegalNumber() {
+  TestError(kNoobInvalidValue, "+0");
+  TestError(kNoobInvalidValue, "+1");
+  TestError(kNoobInvalidValue, ".123"); /* at least one digit before '.' */
+  TestError(kNoobInvalidValue, "1.");   /* at least one digit after '.' */
+  TestError(kNoobInvalidValue, "INF");
+  TestError(kNoobInvalidValue, "inf");
+  TestError(kNoobInvalidValue, "NAN");
+  TestError(kNoobInvalidValue, "nan");
+
+  TestError(kNoobNumberTooBig, "1e309");
+  TestError(kNoobNumberTooBig, "-1e309");
+  TestError(kNoobNotSigular, "0123"); /* after zero should be '.' or nothing */
+  TestError(kNoobNotSigular, "0x0");
+  TestError(kNoobNotSigular, "0x123");
 }
 
 void MainTest() {
-  TestLiteral();
-  TestIllegal();
+  TestParseLiteral();
+  TestParseIllegal();
+  TestParseNumber();
+  TestParseIllegalNumber();
 }
 
 int main() {
