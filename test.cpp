@@ -386,7 +386,6 @@ void FileTest() {
   }
 }
 
-/*
 int main() {
   CaseTest();
   printf("%d/%d (%3.2f%%) Passed\n",
@@ -396,21 +395,4 @@ int main() {
   );
   FileTest();
   return gResult;
-}
-*/
-
-int main() {
-  const char* json = "{\"project\":\"NoobJson\",\"stars\":1}";
-  NoobValue v;
-  v.NoobParse(json);
-
-  const NoobValue &p = v["project"];
-  std::cout << "Type: " << p.type() << std::endl;
-  std::cout << "Value: " << p.string() << std::endl;
-
-  const NoobValue &s = v["stars"];
-  std::cout << "Type: " << s.type() << std::endl;
-  std::cout << "Value: " << s.number() << std::endl;
-
-  return 0;
 }
