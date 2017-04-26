@@ -1,12 +1,12 @@
 /*
  * Project: Noob_Json_Parser
- * File: noob-enum.h
+ * File: noob-constant.h
  * Author: Ling.Li
  * Date: 2017/4/25
  */
 
-#ifndef NOOB_JSON_PARSER_NOOB_ENUM_H
-#define NOOB_JSON_PARSER_NOOB_ENUM_H
+#ifndef NOOB_JSON_PARSER_NOOB_CONSTANT_H
+#define NOOB_JSON_PARSER_NOOB_CONSTANT_H
 
 enum NoobType {
   kNoobNull,
@@ -35,5 +35,4 @@ enum NoobReturnValue {
   kNoobMissCommaOrCurlyBracket
 };
 
-
-#endif //NOOB_JSON_PARSER_NOOB_ENUM_H
+#endif //NOOB_JSON_PARSER_NOOB_CONSTANT_H

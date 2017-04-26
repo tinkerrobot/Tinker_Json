@@ -5,9 +5,14 @@
  * Date: 2017/4/26
  */
 
-#include "../header/std-header.h"
-#include "../header/noob-enum.h"
+#include "../header/noob-constant.h"
 #include "../header/noob-value.h"
+
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 /*
  * Public accessors

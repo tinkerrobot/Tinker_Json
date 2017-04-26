@@ -8,8 +8,11 @@
 #ifndef NOOB_JSON_PARSER_NOOB_VALUE_H
 #define NOOB_JSON_PARSER_NOOB_VALUE_H
 
-#include "std-header.h"
-#include "noob-enum.h"
+#include "noob-constant.h"
+
+#include <cstdio>
+#include <unordered_map>
+#include <vector>
 
 class NoobValue {
  public:

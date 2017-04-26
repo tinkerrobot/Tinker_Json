@@ -1,7 +1,14 @@
-#include <ios>
-#include "header/std-header.h"
-#include "header/noob-enum.h"
+#include "header/noob-constant.h"
 #include "header/noob-value.h"
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <fstream>
+#include <iostream>
+#include <unordered_map>
+#include <vector>
 
 /*
  * Global Variables, store the results of the tests.
@@ -332,19 +339,24 @@ static void TestParseFile(const char *filename) {
   buffer[length] = '\0';
 
   NoobValue v;
+  clock_t start, end;
+  start = clock();
   NoobReturnValue result = v.NoobParse(buffer);
+  end = clock();
   if(result == kNoobOk) {
-    std::cout << "> Test case: " << v["employees"][1]["lastName"].string() << std::endl;
-    std::cout << "> Parsing " << filename << " successful!" << std::endl;
+    printf("> Parsing %s successful!\n", filename);
+    printf("> Time Used: %.4f ms.\n\n", ((double)(end - start) / CLOCKS_PER_SEC) * 1000);
   } else {
-    std::cout << "> Parsing " << filename << " failed!" << std::endl;
+    printf("> Parsing %s failed!\n", filename);
   }
 
   delete[] buffer;
 }
 
 void FileTest() {
-  TestParseFile("data/simple.json");
+  TestParseFile("data/twitter.json");
+  TestParseFile("data/canada.json");
+  TestParseFile("data/citm_catalog.json");
 }
 
 int main() {

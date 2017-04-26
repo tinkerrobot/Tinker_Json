@@ -4,11 +4,12 @@ project(Noob_Json_Parser)
 set(CMAKE_CXX_STANDARD 11)
 
 set(SOURCE_FILES
-  header/std-header.h
-  header/noob-enum.h
+  header/noob-constant.h
   header/noob-value.h
 
-  main.cpp
   source/noob-value.cpp
-  source/noob-accessor.cpp)
+  source/noob-accessor.cpp
+
+  main.cpp
+  )
 add_executable(Noob_Json_Parser ${SOURCE_FILES})

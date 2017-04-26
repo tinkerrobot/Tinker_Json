@@ -5,9 +5,16 @@
  * Date: 2017/4/25
  */
 
-#include "../header/std-header.h"
-#include "../header/noob-enum.h"
+#include "../header/noob-constant.h"
 #include "../header/noob-value.h"
+
+#include <cerrno>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 /*
  * Constructors and destructors
@@ -284,7 +291,6 @@ void NoobValue::NoobEncodeUtf8(std::string *str, unsigned u) {
     str->push_back(0x80 | ( u        & 0x3F));
   }
   else {
-    assert(u <= 0x10FFFF);
     str->push_back(0xF0 | ((u >> 18) & 0xFF));
     str->push_back(0x80 | ((u >> 12) & 0x3F));
     str->push_back(0x80 | ((u >>  6) & 0x3F));
