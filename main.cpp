@@ -176,22 +176,22 @@ static void TestParseObject() {
   ));
   TestEqualInt(kNoobObject, v.NoobGetType());
   TestEqualInt(7, v.NoobGetObjectSize());
-  TestEqualInt(1, v.NoobCountKey("n"));
+  TestTrue(v.NoobHasKey("n"));
   TestEqualInt(kNoobNull, v.NoobGetObjectValue("n")->NoobGetType());
-  TestEqualInt(1, v.NoobCountKey("f"));
+  TestTrue(v.NoobHasKey("f"));
   TestEqualInt(kNoobFalse, v.NoobGetObjectValue("f")->NoobGetType());
-  TestEqualInt(1, v.NoobCountKey("t"));
+  TestTrue(v.NoobHasKey("t"));
   TestEqualInt(kNoobTrue, v.NoobGetObjectValue("t")->NoobGetType());
-  TestEqualInt(1, v.NoobCountKey("i"));
+  TestTrue(v.NoobHasKey("i"));
   TestEqualInt(kNoobNumber, v.NoobGetObjectValue("i")->NoobGetType());
   TestEqualDouble(123.0, v.NoobGetObjectValue("i")->NoobGetNumber());
-  TestEqualInt(1, v.NoobCountKey("s"));
+  TestTrue(v.NoobHasKey("s"));
   TestEqualInt(kNoobString, v.NoobGetObjectValue("s")->NoobGetType());
   TestEqualString("abc",
     v.NoobGetObjectValue("s")->NoobGetString()->c_str(),
     v.NoobGetObjectValue("s")->NoobGetString()->length()
   );
-  TestEqualInt(1, v.NoobCountKey("a"));
+  TestTrue(v.NoobHasKey("a"));
   TestEqualInt(kNoobArray, v.NoobGetObjectValue("a")->NoobGetType());
   TestEqualInt(3, v.NoobGetObjectValue("a")->NoobGetArraySize());
   for (size_t i = 0; i < 3; i++) {
@@ -199,7 +199,7 @@ static void TestParseObject() {
     TestEqualInt(kNoobNumber, e->NoobGetType());
     TestEqualDouble(i + 1.0, e->NoobGetNumber());
   }
-  TestEqualInt(1, v.NoobCountKey("o"));
+  TestTrue(v.NoobHasKey("o"));
   {
     NoobValue* o = v.NoobGetObjectValue("o");
     TestEqualInt(kNoobObject, o->NoobGetType());

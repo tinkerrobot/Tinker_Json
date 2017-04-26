@@ -27,7 +27,7 @@ class NoobValue {
   NoobValue* operator[](size_t index) const;
   size_t NoobGetArraySize() const;
   size_t NoobGetObjectSize() const;
-  size_t NoobCountKey(const std::string &key) const;
+  bool NoobHasKey(const std::string &key) const;
   NoobValue* NoobGetObjectValue(const std::string &key) const;
   NoobValue* operator[](const std::string &key) const;
 
@@ -54,14 +54,14 @@ class NoobValue {
   NoobReturnValue NoobParseArray();
   NoobReturnValue NoobParseObject();
 
+  NoobType _type;
+  const char *_json;
   union {
     std::unordered_map<std::string, NoobValue *> *_object;
     std::vector<NoobValue *> *_array;
     std::string *_string;
     double _number;
   } _value;
-  NoobType _type;
-  NoobContext *_context;
 };
 
 #endif //NOOB_JSON_PARSER_NOOB_VALUE_H

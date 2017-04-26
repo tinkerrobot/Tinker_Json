@@ -14,14 +14,12 @@
 
 NoobValue::NoobValue() {
   _type = kNoobNull;
-  _context = nullptr;
+  _json = nullptr;
   _value._string = nullptr;
 }
 
 NoobValue::~NoobValue() {
   NoobFree();
-  delete _context;
-  _context = nullptr;
 }
 
 NoobType NoobValue::NoobGetType() const {
@@ -106,9 +104,9 @@ size_t NoobValue::NoobGetObjectSize() const {
   }
 }
 
-size_t NoobValue::NoobCountKey(const std::string &key) const {
+bool NoobValue::NoobHasKey(const std::string &key) const {
   if(_type == kNoobObject) {
-    return (_value._object)->count(key);
+    return ((_value._object)->count(key) > 0);
   } else {
     printf("ERROR: Try to access the key of a non-object object!\n");
     exit(-1);
@@ -117,11 +115,7 @@ size_t NoobValue::NoobCountKey(const std::string &key) const {
 
 NoobValue* NoobValue::NoobGetObjectValue(const std::string &key) const {
   if(_type == kNoobObject) {
-    if((_value._object)->count(key)) {
-      return (_value._object)->at(key);
-    } else {
-      return nullptr;
-    }
+    return (_value._object)->at(key);
   } else {
     printf("ERROR: Try to access the element of a non-object object!\n");
     exit(-1);
@@ -143,16 +137,14 @@ NoobValue* NoobValue::operator[](const std::string &key) const {
 
 NoobReturnValue NoobValue::NoobParse(const char *json) {
   NoobFree();
-  delete _context;
-  _context = nullptr;
-  _context = new NoobContext(json);
+  _json = json;
   _type = kNoobNull;
   NoobReturnValue result = kNoobInvalidValue;
   NoobParseWhitespace();
   result = NoobParseValue();
   if(result == kNoobOk) {
     NoobParseWhitespace();
-    if(*(_context->NoobGetJson()) != '\0') {
+    if(*_json != '\0') {
       _type = kNoobNull;
       return kNoobNotSigular;
     }
@@ -217,18 +209,18 @@ void NoobValue::NoobSetString(const char *str, size_t length) {
 }
 
 void NoobValue::NoobParseWhitespace() {
-  const char *pointer = _context->NoobGetJson();
+  const char *pointer = _json;
   while(*pointer == ' ' ||
     *pointer == '\t' ||
     *pointer == '\n' ||
     *pointer == '\r') {
     ++pointer;
   }
-  _context->NoobSetJson(pointer);
+  _json = pointer;
 }
 
 NoobReturnValue NoobValue::NoobParseValue() {
-  switch(*(_context->NoobGetJson())) {
+  switch(*_json) {
     case 'n': {
       return NoobParseLiteral("null", kNoobNull);
     }
@@ -257,12 +249,12 @@ NoobReturnValue NoobValue::NoobParseValue() {
 }
 
 NoobReturnValue NoobValue::NoobParseLiteral(const char* literal, NoobType type) {
-  _context->NoobMoveForward(1);
-  const char *pointer = _context->NoobGetJson();
+  _json++;
+  const char *pointer = _json;
   for (size_t i = 0; literal[i + 1]; ++i)
     if (*(pointer++) != literal[i + 1])
       return kNoobInvalidValue;
-  _context->NoobSetJson(pointer);
+  _json = pointer;
   _type = type;
   return kNoobOk;
 }
@@ -276,7 +268,7 @@ inline bool IsDigit1To9(char ch) {
 }
 
 NoobReturnValue NoobValue::NoobParseNumber() {
-  const char *pointer = _context->NoobGetJson();
+  const char *pointer = _json;
   if(*pointer == '-') {
     pointer++;
   }
@@ -313,25 +305,25 @@ NoobReturnValue NoobValue::NoobParseNumber() {
   }
 
   errno = 0;
-  _value._number = strtod(_context->NoobGetJson(), nullptr);
+  _value._number = strtod(_json, nullptr);
   if(errno == ERANGE &&
     (_value._number == HUGE_VAL ||
       _value._number == -HUGE_VAL)) {
     return kNoobNumberTooBig;
   }
   _type = kNoobNumber;
-  _context->NoobSetJson(pointer);
+  _json = pointer;
   return kNoobOk;
 }
 
 NoobReturnValue NoobValue::NoobParseStringRaw(std::string *str) {
-  _context->NoobMoveForward(1);
-  const char *pointer = _context->NoobGetJson();
+  _json++;
+  const char *pointer = _json;
   while(true) {
     char ch = *pointer++;
     switch(ch) {
       case '\"': {
-        _context->NoobSetJson(pointer);
+        _json = pointer;
         return kNoobOk;
       }
       case '\0': {
@@ -381,32 +373,32 @@ NoobReturnValue NoobValue::NoobParseString() {
 }
 
 NoobReturnValue NoobValue::NoobParseArray() {
-  _context->NoobMoveForward(1);
+  _json++;
   NoobReturnValue result = kNoobInvalidValue;
   NoobFree();
   _value._array = new std::vector<NoobValue *>();
   NoobParseWhitespace();
-  if(*(_context->NoobGetJson()) == ']') {
-    _context->NoobMoveForward(1);
+  if(*_json == ']') {
+    _json++;
     _type = kNoobArray;
     return kNoobOk;
   }
   while(true) {
     NoobValue *element = new NoobValue();
-    element->_context = new NoobContext(_context->NoobGetJson());
+    element->_json = _json;
     result = element->NoobParseValue();
     if(result != kNoobOk) {
       delete element;
       break;
     } else {
       (_value._array)->push_back(element);
-      _context->NoobSetJson(element->_context->NoobGetJson());
+      _json = element->_json;
       NoobParseWhitespace();
-      if(*(_context->NoobGetJson()) == ',') {
-        _context->NoobMoveForward(1);
+      if(*_json == ',') {
+        _json++;
         NoobParseWhitespace();
-      } else if(*(_context->NoobGetJson()) == ']') {
-        _context->NoobMoveForward(1);
+      } else if(*_json == ']') {
+        _json++;
         _type = kNoobArray;
         return kNoobOk;
       } else {
@@ -425,13 +417,13 @@ NoobReturnValue NoobValue::NoobParseArray() {
 }
 
 NoobReturnValue NoobValue::NoobParseObject() {
-  _context->NoobMoveForward(1);
+  _json++;
   NoobReturnValue result = kNoobInvalidValue;
   NoobFree();
   _value._object = new std::unordered_map<std::string, NoobValue *>();
   NoobParseWhitespace();
-  if(*(_context->NoobGetJson()) == '}') {
-    _context->NoobMoveForward(1);
+  if(*_json == '}') {
+    _json++;
     _type = kNoobObject;
     return kNoobOk;
   }
@@ -439,7 +431,7 @@ NoobReturnValue NoobValue::NoobParseObject() {
     NoobValue *element = new NoobValue();
     std::string key = "";
 
-    if(*(_context->NoobGetJson()) != '"') {
+    if(*_json != '"') {
       result = kNoobMissKey;
       delete element;
       break;
@@ -450,27 +442,27 @@ NoobReturnValue NoobValue::NoobParseObject() {
       break;
     }
     NoobParseWhitespace();
-    if(*(_context->NoobGetJson()) != ':') {
+    if(*_json != ':') {
       result = kNoobMissColon;
       delete element;
       break;
     }
-    _context->NoobMoveForward(1);
+    _json++;
     NoobParseWhitespace();
-    element->_context = new NoobContext(_context->NoobGetJson());
+    element->_json = _json;
     result = element->NoobParseValue();
     if(result != kNoobOk) {
       delete element;
       break;
     }
     (_value._object)->insert({key, element});
-    _context->NoobSetJson(element->_context->NoobGetJson());
+    _json = element->_json;
     NoobParseWhitespace();
-    if(*(_context->NoobGetJson()) == ',') {
-      _context->NoobMoveForward(1);
+    if(*_json == ',') {
+      _json++;
       NoobParseWhitespace();
-    } else if(*(_context->NoobGetJson()) == '}') {
-      _context->NoobMoveForward(1);
+    } else if(*_json == '}') {
+      _json++;
       _type = kNoobObject;
       return kNoobOk;
     } else {
