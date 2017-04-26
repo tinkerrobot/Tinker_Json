@@ -230,6 +230,11 @@ void NoobValue::NoobEncodeUtf8(std::string *str, unsigned u) {
   }
 }
 
+NoobReturnValue NoobDeleteString(std::string *str, NoobReturnValue result) {
+  delete str;
+  return result;
+}
+
 NoobReturnValue NoobValue::NoobParseStringRaw(std::string *str) {
   _json++;
   const char *pointer = _json;
@@ -241,8 +246,7 @@ NoobReturnValue NoobValue::NoobParseStringRaw(std::string *str) {
         return kNoobOk;
       }
       case '\0': {
-        delete str;
-        return kNoobMissQuotationMark;
+        return NoobDeleteString(str, kNoobMissQuotationMark);
       }
       case '\\': {
         switch(*pointer++) {
@@ -257,45 +261,32 @@ NoobReturnValue NoobValue::NoobParseStringRaw(std::string *str) {
           case 'u': {
             unsigned u1, u2;
             pointer = NoobParseHex4(pointer, &u1);
-            if(pointer == nullptr) {
-              delete str;
-              return kNoobInvalidUnicodeHex;
-            }
+            if(pointer == nullptr)
+              return NoobDeleteString(str, kNoobInvalidUnicodeHex);
             if(u1 >= 0xD800 && u1 <= 0xDBFF) {
-              if(*pointer++ != '\\') {
-                delete str;
-                return kNoobInvalidUnicodeSurrogate;
-              }
-              if(*pointer++ != 'u') {
-                delete str;
-                return kNoobInvalidUnicodeSurrogate;
-              }
+              if(*pointer++ != '\\')
+                return NoobDeleteString(str, kNoobInvalidUnicodeSurrogate);
+              if(*pointer++ != 'u')
+                return NoobDeleteString(str, kNoobInvalidUnicodeSurrogate);
               pointer = NoobParseHex4(pointer, &u2);
-              if(pointer == nullptr) {
-                delete str;
-                return kNoobInvalidUnicodeHex;
-              }
-              if(u2 < 0xDC00 || u2 > 0xDFFF) {
-                delete str;
-                return kNoobInvalidUnicodeSurrogate;
-              }
+              if(pointer == nullptr)
+                return NoobDeleteString(str, kNoobInvalidUnicodeHex);
+              if(u2 < 0xDC00 || u2 > 0xDFFF)
+                return NoobDeleteString(str, kNoobInvalidUnicodeSurrogate);
               u1 = (((u1 - 0xD800) << 10) | (u2 - 0xDC00)) + 0x10000;
             }
             NoobEncodeUtf8(str, u1);
             break;
           }
           default: {
-            delete str;
-            return kNoobInvalidStringEscape;
+            return NoobDeleteString(str, kNoobInvalidStringEscape);
           }
         }
         break;
       }
       default: {
-        if((unsigned char)ch < 0x20) {
-          delete str;
-          return kNoobInvalidStringChar;
-        }
+        if((unsigned char)ch < 0x20)
+          return NoobDeleteString(str, kNoobInvalidStringChar);
         str->push_back(ch);
       }
     }
