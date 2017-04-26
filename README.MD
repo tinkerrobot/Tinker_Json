@@ -1,6 +1,6 @@
 # Noob JSON Parser - C++ Version of Lept JSON Parser
 
-![](https://img.shields.io/badge/release-v1.0.0-blue.png)
+![Release](https://img.shields.io/badge/release-v1.0.0-blue.png)
 
 ## Build status
 
