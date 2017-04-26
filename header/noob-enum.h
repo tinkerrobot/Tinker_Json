@@ -29,7 +29,10 @@ enum NoobReturnValue {
   kNoobInvalidStringChar,
   kNoobInvalidUnicodeHex,
   kNoobInvalidUnicodeSurrogate,
-  kNoobMissCommaOrSquareBracket
+  kNoobMissCommaOrSquareBracket,
+  kNoobMissKey,
+  kNoobMissColon,
+  kNoobMissCommaOrCurlyBracket
 };
 
 

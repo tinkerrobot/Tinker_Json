@@ -26,6 +26,11 @@ class NoobValue {
   NoobValue* NoobGetArrayElement(size_t index) const;
   NoobValue* operator[](size_t index) const;
   size_t NoobGetArraySize() const;
+  size_t NoobGetObjectSize() const;
+  size_t NoobCountKey(const std::string &key) const;
+  NoobValue* NoobGetObjectValue(const std::string &key) const;
+  NoobValue* operator[](const std::string &key) const;
+
 
   NoobReturnValue NoobParse(const char *json);
 
@@ -44,10 +49,13 @@ class NoobValue {
   NoobReturnValue NoobParseValue();
   NoobReturnValue NoobParseLiteral(const char* literal, NoobType type);
   NoobReturnValue NoobParseNumber();
+  NoobReturnValue NoobParseStringRaw(std::string *str);
   NoobReturnValue NoobParseString();
   NoobReturnValue NoobParseArray();
+  NoobReturnValue NoobParseObject();
 
   union {
+    std::unordered_map<std::string, NoobValue *> *_object;
     std::vector<NoobValue *> *_array;
     std::string *_string;
     double _number;

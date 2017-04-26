@@ -156,6 +156,62 @@ static void TestParseArray() {
   }
 }
 
+static void TestParseObject() {
+  NoobValue v;
+  
+  TestEqualInt(kNoobOk, v.NoobParse(" { } "));
+  TestEqualInt(kNoobObject, v.NoobGetType());
+  TestEqualInt(0, v.NoobGetObjectSize());
+  
+  TestEqualInt(kNoobOk, v.NoobParse(
+    " { "
+      "\"n\" : null , "
+      "\"f\" : false , "
+      "\"t\" : true , "
+      "\"i\" : 123 , "
+      "\"s\" : \"abc\", "
+      "\"a\" : [ 1, 2, 3 ],"
+      "\"o\" : { \"1\" : 1, \"2\" : 2, \"3\" : 3 }"
+      " } "
+  ));
+  TestEqualInt(kNoobObject, v.NoobGetType());
+  TestEqualInt(7, v.NoobGetObjectSize());
+  TestEqualInt(1, v.NoobCountKey("n"));
+  TestEqualInt(kNoobNull, v.NoobGetObjectValue("n")->NoobGetType());
+  TestEqualInt(1, v.NoobCountKey("f"));
+  TestEqualInt(kNoobFalse, v.NoobGetObjectValue("f")->NoobGetType());
+  TestEqualInt(1, v.NoobCountKey("t"));
+  TestEqualInt(kNoobTrue, v.NoobGetObjectValue("t")->NoobGetType());
+  TestEqualInt(1, v.NoobCountKey("i"));
+  TestEqualInt(kNoobNumber, v.NoobGetObjectValue("i")->NoobGetType());
+  TestEqualDouble(123.0, v.NoobGetObjectValue("i")->NoobGetNumber());
+  TestEqualInt(1, v.NoobCountKey("s"));
+  TestEqualInt(kNoobString, v.NoobGetObjectValue("s")->NoobGetType());
+  TestEqualString("abc",
+    v.NoobGetObjectValue("s")->NoobGetString()->c_str(),
+    v.NoobGetObjectValue("s")->NoobGetString()->length()
+  );
+  TestEqualInt(1, v.NoobCountKey("a"));
+  TestEqualInt(kNoobArray, v.NoobGetObjectValue("a")->NoobGetType());
+  TestEqualInt(3, v.NoobGetObjectValue("a")->NoobGetArraySize());
+  for (size_t i = 0; i < 3; i++) {
+    NoobValue* e = v.NoobGetObjectValue("a")->NoobGetArrayElement(i);
+    TestEqualInt(kNoobNumber, e->NoobGetType());
+    TestEqualDouble(i + 1.0, e->NoobGetNumber());
+  }
+  TestEqualInt(1, v.NoobCountKey("o"));
+  {
+    NoobValue* o = v.NoobGetObjectValue("o");
+    TestEqualInt(kNoobObject, o->NoobGetType());
+    std::string key[] = {"1", "2", "3"};
+    for (size_t i = 0; i < 3; i++) {
+      NoobValue* ov = o->NoobGetObjectValue(key[i]);
+      TestEqualInt(kNoobNumber, ov->NoobGetType());
+      TestEqualDouble(i + 1.0, ov->NoobGetNumber());
+    }
+  }
+}
+
 static void TestParseIllegalLiteral() {
   TestError(kNoobExpectValue, "");
   TestError(kNoobExpectValue, " ");
@@ -201,15 +257,38 @@ static void TestParseIllegalArray() {
   TestError(kNoobMissCommaOrSquareBracket, "[[]");
 }
 
+static void TestParseIllegalObject() {
+
+  TestError(kNoobMissKey, "{:1,");
+  TestError(kNoobMissKey, "{1:1,");
+  TestError(kNoobMissKey, "{true:1,");
+  TestError(kNoobMissKey, "{false:1,");
+  TestError(kNoobMissKey, "{null:1,");
+  TestError(kNoobMissKey, "{[]:1,");
+  TestError(kNoobMissKey, "{{}:1,");
+  TestError(kNoobMissKey, "{\"a\":1,");
+
+  TestError(kNoobMissColon, "{\"a\"}");
+  TestError(kNoobMissColon, "{\"a\",\"b\"}");
+
+  TestError(kNoobMissCommaOrCurlyBracket, "{\"a\":1");
+  TestError(kNoobMissCommaOrCurlyBracket, "{\"a\":1]");
+  TestError(kNoobMissCommaOrCurlyBracket, "{\"a\":1 \"b\"");
+  TestError(kNoobMissCommaOrCurlyBracket, "{\"a\":{}");
+
+}
+
 void MainTest() {
   TestParseLiteral();
   TestParseNumber();
   TestParseString();
   TestParseArray();
+  TestParseObject();
   TestParseIllegalLiteral();
   TestParseIllegalNumber();
   TestParseIllegalString();
   TestParseIllegalArray();
+  TestParseIllegalObject();
 }
 
 int main() {
