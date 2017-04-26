@@ -172,11 +172,11 @@ static void TestParseArray() {
 
 static void TestParseObject() {
   NoobValue v;
-  
+
   TestEqualInt(kNoobOk, v.NoobParse(" { } "));
   TestEqualInt(kNoobObject, v.NoobGetType());
   TestEqualInt(0, v.NoobGetObjectSize());
-  
+
   TestEqualInt(kNoobOk, v.NoobParse(
     " { "
       "\"n\" : null , "
@@ -327,7 +327,7 @@ void CaseTest() {
   TestParseIllegalObject();
 }
 
-static void TestParseFile(const char *filename) {
+static double TestParseFile(const char *filename) {
   std::ifstream is(filename, std::ifstream::binary);
 
   is.seekg(0, is.end);
@@ -339,26 +339,54 @@ static void TestParseFile(const char *filename) {
   buffer[length] = '\0';
 
   NoobValue v;
+  double time_used = 0.0;
   clock_t start, end;
   start = clock();
   NoobReturnValue result = v.NoobParse(buffer);
   end = clock();
   if(result == kNoobOk) {
+    time_used = ((double)(end - start) / CLOCKS_PER_SEC) * 1000;
     printf("> Parsing %s successful!\n", filename);
-    printf("> Time Used: %.4f ms.\n\n", ((double)(end - start) / CLOCKS_PER_SEC) * 1000);
+    printf("> Time Used: %.4f ms.\n", time_used);
   } else {
+    time_used = -1.0;
     printf("> Parsing %s failed!\n", filename);
   }
 
   delete[] buffer;
+  is.close();
+  return time_used;
 }
 
 void FileTest() {
-  TestParseFile("data/twitter.json");
-  TestParseFile("data/canada.json");
-  TestParseFile("data/citm_catalog.json");
+  const char *files[] = {
+    "test/twitter.json",
+    "test/canada.json",
+    "test/citm_catalog.json",
+  };
+
+  for(int j = 0; j < 3; ++j) {
+    bool flag = true;
+    double average_time = 0.0;
+    const char *filename = files[j];
+    for(int i = 0; i < 10; ++i) {
+      double current_time = TestParseFile(filename);
+      if(current_time == -1.0) {
+        printf("> Parse %s failed at TEST: %d\n", filename, i + 1);
+        flag = false;
+        break;
+      } else {
+        average_time += current_time;
+      }
+    }
+    if(flag) {
+      printf("> Parse %s succeed! Average time: %.4f\n", filename, average_time / 10);
+      printf(">>>>>>>>>>>>>>>>>>>>>>>>\n\n");
+    }
+  }
 }
 
+/*
 int main() {
   CaseTest();
   printf("%d/%d (%3.2f%%) Passed\n",
@@ -368,4 +396,21 @@ int main() {
   );
   FileTest();
   return gResult;
+}
+*/
+
+int main() {
+  const char* json = "{\"project\":\"NoobJson\",\"stars\":1}";
+  NoobValue v;
+  v.NoobParse(json);
+
+  const NoobValue &p = v["project"];
+  std::cout << "Type: " << p.type() << std::endl;
+  std::cout << "Value: " << p.string() << std::endl;
+
+  const NoobValue &s = v["stars"];
+  std::cout << "Type: " << s.type() << std::endl;
+  std::cout << "Value: " << s.number() << std::endl;
+
+  return 0;
 }

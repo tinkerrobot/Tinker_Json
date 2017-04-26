@@ -19,7 +19,8 @@ class NoobValue {
   NoobValue();
   ~NoobValue();
 
-  NoobType type() const;
+  const char* type() const;
+  NoobType type_val() const;
   bool boolean() const;
   double number() const;
   const std::string& string() const;

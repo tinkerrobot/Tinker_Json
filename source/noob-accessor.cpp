@@ -18,12 +18,43 @@
  * Public accessors
  */
 
+const char *NoobTypeString[] = {
+  "Null",
+  "False",
+  "True",
+  "Number",
+  "String",
+  "Array",
+  "Object"
+};
+
+const char *NoobStatusString[] = {
+  "Ok",
+  "ExpectValue",
+  "InvalidValue",
+  "NotSigular",
+  "NumberTooBig",
+  "MissQuotationMark",
+  "InvalidStringEscape",
+  "InvalidStringChar",
+  "InvalidUnicodeHex",
+  "InvalidUnicodeSurrogate",
+  "MissCommaOrSquareBracket",
+  "MissKey",
+  "MissColon",
+  "MissCommaOrCurlyBracket"
+};
+
 void NoobCrash(const char *error_msg) {
   fprintf(stderr, "> ERROR: %s\n", error_msg);
   exit(31);
 }
 
-NoobType NoobValue::type() const {
+const char* NoobValue::type() const {
+  return NoobTypeString[_type];
+}
+
+NoobType NoobValue::type_val() const {
   return _type;
 }
 
