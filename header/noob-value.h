@@ -10,7 +10,6 @@
 
 #include "std-header.h"
 #include "noob-enum.h"
-#include "noob-context.h"
 
 class NoobValue {
  public:
@@ -49,6 +48,8 @@ class NoobValue {
   NoobReturnValue NoobParseValue();
   NoobReturnValue NoobParseLiteral(const char* literal, NoobType type);
   NoobReturnValue NoobParseNumber();
+  const char* NoobParseHex4(const char *pointer, unsigned *u);
+  void NoobEncodeUtf8(std::string *str, unsigned u);
   NoobReturnValue NoobParseStringRaw(std::string *str);
   NoobReturnValue NoobParseString();
   NoobReturnValue NoobParseArray();

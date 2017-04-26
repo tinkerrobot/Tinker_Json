@@ -8,6 +8,7 @@
 #include "../header/std-header.h"
 #include "../header/noob-enum.h"
 #include "../header/noob-value.h"
+
 /*
  * Public functions
  */
@@ -316,6 +317,45 @@ NoobReturnValue NoobValue::NoobParseNumber() {
   return kNoobOk;
 }
 
+const char* NoobValue::NoobParseHex4(const char *pointer, unsigned *u) {
+  *u = 0;
+  for (int i = 0; i < 4; ++i) {
+    char ch = *pointer++;
+    *u <<= 4;
+    if(ch >= '0' && ch <= '9') {
+      *u |= ch - '0';
+    } else if(ch >= 'A' && ch <= 'F') {
+      *u |= ch - ('A' - 10);
+    } else if(ch >= 'a' && ch <= 'f') {
+      *u |= ch - ('a' - 10);
+    } else {
+      return NULL;
+    }
+  }
+  return pointer;
+}
+
+void NoobValue::NoobEncodeUtf8(std::string *str, unsigned u) {
+  if (u <= 0x7F)
+    str->push_back(u & 0xFF);
+  else if (u <= 0x7FF) {
+    str->push_back(0xC0 | ((u >> 6) & 0xFF));
+    str->push_back(0x80 | ( u       & 0x3F));
+  }
+  else if (u <= 0xFFFF) {
+    str->push_back(0xE0 | ((u >> 12) & 0xFF));
+    str->push_back(0x80 | ((u >>  6) & 0x3F));
+    str->push_back(0x80 | ( u        & 0x3F));
+  }
+  else {
+    assert(u <= 0x10FFFF);
+    str->push_back(0xF0 | ((u >> 18) & 0xFF));
+    str->push_back(0x80 | ((u >> 12) & 0x3F));
+    str->push_back(0x80 | ((u >>  6) & 0x3F));
+    str->push_back(0x80 | ( u        & 0x3F));
+  }
+}
+
 NoobReturnValue NoobValue::NoobParseStringRaw(std::string *str) {
   _json++;
   const char *pointer = _json;
@@ -328,7 +368,6 @@ NoobReturnValue NoobValue::NoobParseStringRaw(std::string *str) {
       }
       case '\0': {
         delete str;
-        str = nullptr;
         return kNoobMissQuotationMark;
       }
       case '\\': {
@@ -341,9 +380,38 @@ NoobReturnValue NoobValue::NoobParseStringRaw(std::string *str) {
           case 'n':  str->push_back('\n'); break;
           case 'r':  str->push_back('\r'); break;
           case 't':  str->push_back('\t'); break;
+          case 'u': {
+            unsigned u1, u2;
+            pointer = NoobParseHex4(pointer, &u1);
+            if(pointer == nullptr) {
+              delete str;
+              return kNoobInvalidUnicodeHex;
+            }
+            if(u1 >= 0xD800 && u1 <= 0xDBFF) {
+              if(*pointer++ != '\\') {
+                delete str;
+                return kNoobInvalidUnicodeSurrogate;
+              }
+              if(*pointer++ != 'u') {
+                delete str;
+                return kNoobInvalidUnicodeSurrogate;
+              }
+              pointer = NoobParseHex4(pointer, &u2);
+              if(pointer == nullptr) {
+                delete str;
+                return kNoobInvalidUnicodeHex;
+              }
+              if(u2 < 0xDC00 || u2 > 0xDFFF) {
+                delete str;
+                return kNoobInvalidUnicodeSurrogate;
+              }
+              u1 = (((u1 - 0xD800) << 10) | (u2 - 0xDC00)) + 0x10000;
+            }
+            NoobEncodeUtf8(str, u1);
+            break;
+          }
           default: {
             delete str;
-            str = nullptr;
             return kNoobInvalidStringEscape;
           }
         }
@@ -352,7 +420,6 @@ NoobReturnValue NoobValue::NoobParseStringRaw(std::string *str) {
       default: {
         if((unsigned char)ch < 0x20) {
           delete str;
-          str = nullptr;
           return kNoobInvalidStringChar;
         }
         str->push_back(ch);

@@ -120,6 +120,12 @@ static void TestParseString() {
   TestString("Hello", "\"Hello\"");
   TestString("Hello\nWorld", "\"Hello\\nWorld\"");
   TestString("\" \\ / \b \f \n \r \t", "\"\\\" \\\\ \\/ \\b \\f \\n \\r \\t\"");
+  TestString("Hello\0World", "\"Hello\\u0000World\"");
+  TestString("\x24", "\"\\u0024\"");         /* Dollar sign U+0024 */
+  TestString("\xC2\xA2", "\"\\u00A2\"");     /* Cents sign U+00A2 */
+  TestString("\xE2\x82\xAC", "\"\\u20AC\""); /* Euro sign U+20AC */
+  TestString("\xF0\x9D\x84\x9E", "\"\\uD834\\uDD1E\"");  /* G clef sign U+1D11E */
+  TestString("\xF0\x9D\x84\x9E", "\"\\ud834\\udd1e\"");  /* G clef sign U+1D11E */
 }
 
 static void TestParseArray() {
@@ -250,6 +256,28 @@ static void TestParseIllegalString() {
   TestError(kNoobInvalidStringChar, "\"\x1F\"");
 }
 
+static void TestParseIllegalUnicode() {
+  TestError(kNoobInvalidUnicodeHex, "\"\\u\"");
+  TestError(kNoobInvalidUnicodeHex, "\"\\u0\"");
+  TestError(kNoobInvalidUnicodeHex, "\"\\u01\"");
+  TestError(kNoobInvalidUnicodeHex, "\"\\u012\"");
+  TestError(kNoobInvalidUnicodeHex, "\"\\u/000\"");
+  TestError(kNoobInvalidUnicodeHex, "\"\\uG000\"");
+  TestError(kNoobInvalidUnicodeHex, "\"\\u0/00\"");
+  TestError(kNoobInvalidUnicodeHex, "\"\\u0G00\"");
+  TestError(kNoobInvalidUnicodeHex, "\"\\u0/00\"");
+  TestError(kNoobInvalidUnicodeHex, "\"\\u00G0\"");
+  TestError(kNoobInvalidUnicodeHex, "\"\\u000/\"");
+  TestError(kNoobInvalidUnicodeHex, "\"\\u000G\"");
+  TestError(kNoobInvalidUnicodeHex, "\"\\u 123\"");
+
+  TestError(kNoobInvalidUnicodeSurrogate, "\"\\uD800\"");
+  TestError(kNoobInvalidUnicodeSurrogate, "\"\\uDBFF\"");
+  TestError(kNoobInvalidUnicodeSurrogate, "\"\\uD800\\\\\"");
+  TestError(kNoobInvalidUnicodeSurrogate, "\"\\uD800\\uDBFF\"");
+  TestError(kNoobInvalidUnicodeSurrogate, "\"\\uD800\\uE000\"");
+}
+
 static void TestParseIllegalArray() {
   TestError(kNoobMissCommaOrSquareBracket, "[1");
   TestError(kNoobMissCommaOrSquareBracket, "[1}");
@@ -287,6 +315,7 @@ void MainTest() {
   TestParseIllegalLiteral();
   TestParseIllegalNumber();
   TestParseIllegalString();
+  TestParseIllegalUnicode();
   TestParseIllegalArray();
   TestParseIllegalObject();
 }
