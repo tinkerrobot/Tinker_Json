@@ -25,7 +25,9 @@ Finally I want to express my thanks to [@Milo Yip](https://github.com/miloyip), 
 I use three json files which are also used in [NativeJson Benchmark](https://github.com/miloyip/nativejson-benchmark) to test the speed of parsing. The result is the average time of 10 tests.
 
 **twitter.json**: 11.1200 ms
+
 **canada.json**: 98.7580 ms
+
 **citm_catalog.json**: 10.8850 ms
 
 The test files can be found in the `test` folder.
