@@ -16,20 +16,29 @@ class NoobValue {
   NoobValue();
   ~NoobValue();
 
+  NoobType type() const;
+  bool boolean() const;
+  double number() const;
+  const std::string& string() const;
+  size_t length() const;
+  const NoobValue& at(size_t index) const;
+  const NoobValue& operator[](size_t index) const;
+  size_t array_size() const;
+  bool has_key(const std::string &key) const;
+  const NoobValue& at(const std::string &key) const;
+  const NoobValue& operator[](const std::string &key) const;
+
   NoobType NoobGetType() const;
   void NoobSetType(NoobType type);
   bool NoobGetBoolean() const;
   double NoobGetNumber() const;
-  const std::string* NoobGetString() const;
+  const std::string& NoobGetString() const;
   size_t NoobGetStringLength() const;
-  NoobValue* NoobGetArrayElement(size_t index) const;
-  NoobValue* operator[](size_t index) const;
+  const NoobValue& NoobGetArrayElement(size_t index) const;
   size_t NoobGetArraySize() const;
   size_t NoobGetObjectSize() const;
   bool NoobHasKey(const std::string &key) const;
-  NoobValue* NoobGetObjectValue(const std::string &key) const;
-  NoobValue* operator[](const std::string &key) const;
-
+  const NoobValue& NoobGetObjectValue(const std::string &key) const;
 
   NoobReturnValue NoobParse(const char *json);
 

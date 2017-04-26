@@ -1,3 +1,4 @@
+#include <ios>
 #include "header/std-header.h"
 #include "header/noob-enum.h"
 #include "header/noob-value.h"
@@ -63,7 +64,7 @@ int gTestPass = 0;
     NoobValue v;\
     TestEqualInt(kNoobOk, v.NoobParse(json));\
     TestEqualInt(kNoobString, v.NoobGetType());\
-    TestEqualString(expect, v.NoobGetString()->c_str(), v.NoobGetStringLength());\
+    TestEqualString(expect, v.NoobGetString().c_str(), v.NoobGetStringLength());\
   } while(0)
 
 #define TestTrue(actual) TestEqualBase((actual) != 0, "true", "false")
@@ -137,27 +138,27 @@ static void TestParseArray() {
   TestEqualInt(kNoobOk, v.NoobParse("[ null , false , true , 123 , \"abc\" ]"));
   TestEqualInt(kNoobArray, v.NoobGetType());
   TestEqualInt(5, v.NoobGetArraySize());
-  TestEqualInt(kNoobNull,   v[0]->NoobGetType());
-  TestEqualInt(kNoobFalse,  v[1]->NoobGetType());
-  TestEqualInt(kNoobTrue,   v[2]->NoobGetType());
-  TestEqualInt(kNoobNumber, v[3]->NoobGetType());
-  TestEqualInt(kNoobString, v[4]->NoobGetType());
-  TestEqualDouble(123.0, v[3]->NoobGetNumber());
+  TestEqualInt(kNoobNull,   v[0].NoobGetType());
+  TestEqualInt(kNoobFalse,  v[1].NoobGetType());
+  TestEqualInt(kNoobTrue,   v[2].NoobGetType());
+  TestEqualInt(kNoobNumber, v[3].NoobGetType());
+  TestEqualInt(kNoobString, v[4].NoobGetType());
+  TestEqualDouble(123.0, v[3].NoobGetNumber());
   TestEqualString("abc",
-    v[4]->NoobGetString()->c_str(),
-    v[4]->NoobGetStringLength());
+    v[4].NoobGetString().c_str(),
+    v[4].NoobGetStringLength());
 
   TestEqualInt(kNoobOk, v.NoobParse("[ [ ] , [ 0 ] , [ 0 , 1 ] , [ 0 , 1 , 2 ] ]"));
   TestEqualInt(kNoobArray, v.NoobGetType());
   TestEqualInt(4, v.NoobGetArraySize());
   for (int i = 0; i < 4; i++) {
-    NoobValue* a = v[i];
-    TestEqualInt(kNoobArray, a->NoobGetType());
-    TestEqualInt(i, a->NoobGetArraySize());
+    const NoobValue &a = v[i];
+    TestEqualInt(kNoobArray, a.NoobGetType());
+    TestEqualInt(i, a.NoobGetArraySize());
     for (int j = 0; j < i; j++) {
-      NoobValue *e = (*a)[j];
-      TestEqualInt(kNoobNumber, e->NoobGetType());
-      TestEqualDouble((double)j, e->NoobGetNumber());
+      const NoobValue &e = a[j];
+      TestEqualInt(kNoobNumber, e.NoobGetType());
+      TestEqualDouble((double)j, e.NoobGetNumber());
     }
   }
 }
@@ -183,37 +184,37 @@ static void TestParseObject() {
   TestEqualInt(kNoobObject, v.NoobGetType());
   TestEqualInt(7, v.NoobGetObjectSize());
   TestTrue(v.NoobHasKey("n"));
-  TestEqualInt(kNoobNull, v.NoobGetObjectValue("n")->NoobGetType());
+  TestEqualInt(kNoobNull, v.NoobGetObjectValue("n").NoobGetType());
   TestTrue(v.NoobHasKey("f"));
-  TestEqualInt(kNoobFalse, v.NoobGetObjectValue("f")->NoobGetType());
+  TestEqualInt(kNoobFalse, v.NoobGetObjectValue("f").NoobGetType());
   TestTrue(v.NoobHasKey("t"));
-  TestEqualInt(kNoobTrue, v.NoobGetObjectValue("t")->NoobGetType());
+  TestEqualInt(kNoobTrue, v.NoobGetObjectValue("t").NoobGetType());
   TestTrue(v.NoobHasKey("i"));
-  TestEqualInt(kNoobNumber, v.NoobGetObjectValue("i")->NoobGetType());
-  TestEqualDouble(123.0, v.NoobGetObjectValue("i")->NoobGetNumber());
+  TestEqualInt(kNoobNumber, v.NoobGetObjectValue("i").NoobGetType());
+  TestEqualDouble(123.0, v.NoobGetObjectValue("i").NoobGetNumber());
   TestTrue(v.NoobHasKey("s"));
-  TestEqualInt(kNoobString, v.NoobGetObjectValue("s")->NoobGetType());
+  TestEqualInt(kNoobString, v.NoobGetObjectValue("s").NoobGetType());
   TestEqualString("abc",
-    v.NoobGetObjectValue("s")->NoobGetString()->c_str(),
-    v.NoobGetObjectValue("s")->NoobGetString()->length()
+    v.NoobGetObjectValue("s").NoobGetString().c_str(),
+    v.NoobGetObjectValue("s").NoobGetString().length()
   );
   TestTrue(v.NoobHasKey("a"));
-  TestEqualInt(kNoobArray, v.NoobGetObjectValue("a")->NoobGetType());
-  TestEqualInt(3, v.NoobGetObjectValue("a")->NoobGetArraySize());
+  TestEqualInt(kNoobArray, v.NoobGetObjectValue("a").NoobGetType());
+  TestEqualInt(3, v.NoobGetObjectValue("a").NoobGetArraySize());
   for (size_t i = 0; i < 3; i++) {
-    NoobValue* e = v.NoobGetObjectValue("a")->NoobGetArrayElement(i);
-    TestEqualInt(kNoobNumber, e->NoobGetType());
-    TestEqualDouble(i + 1.0, e->NoobGetNumber());
+    const NoobValue& e = v.NoobGetObjectValue("a").NoobGetArrayElement(i);
+    TestEqualInt(kNoobNumber, e.NoobGetType());
+    TestEqualDouble(i + 1.0, e.NoobGetNumber());
   }
   TestTrue(v.NoobHasKey("o"));
   {
-    NoobValue* o = v.NoobGetObjectValue("o");
-    TestEqualInt(kNoobObject, o->NoobGetType());
+    const NoobValue &o = v.NoobGetObjectValue("o");
+    TestEqualInt(kNoobObject, o.NoobGetType());
     std::string key[] = {"1", "2", "3"};
     for (size_t i = 0; i < 3; i++) {
-      NoobValue* ov = o->NoobGetObjectValue(key[i]);
-      TestEqualInt(kNoobNumber, ov->NoobGetType());
-      TestEqualDouble(i + 1.0, ov->NoobGetNumber());
+      const NoobValue &ov = o.NoobGetObjectValue(key[i]);
+      TestEqualInt(kNoobNumber, ov.NoobGetType());
+      TestEqualDouble(i + 1.0, ov.NoobGetNumber());
     }
   }
 }
@@ -303,10 +304,9 @@ static void TestParseIllegalObject() {
   TestError(kNoobMissCommaOrCurlyBracket, "{\"a\":1]");
   TestError(kNoobMissCommaOrCurlyBracket, "{\"a\":1 \"b\"");
   TestError(kNoobMissCommaOrCurlyBracket, "{\"a\":{}");
-
 }
 
-void MainTest() {
+void CaseTest() {
   TestParseLiteral();
   TestParseNumber();
   TestParseString();
@@ -320,12 +320,40 @@ void MainTest() {
   TestParseIllegalObject();
 }
 
+static void TestParseFile(const char *filename) {
+  std::ifstream is(filename, std::ifstream::binary);
+
+  is.seekg(0, is.end);
+  long long length = is.tellg();
+  is.seekg(0, is.beg);
+
+  char *buffer = new char[length + 1];
+  is.read(buffer, length);
+  buffer[length] = '\0';
+
+  NoobValue v;
+  NoobReturnValue result = v.NoobParse(buffer);
+  if(result == kNoobOk) {
+    std::cout << "> Test case: " << v["employees"][1]["lastName"].string() << std::endl;
+    std::cout << "> Parsing " << filename << " successful!" << std::endl;
+  } else {
+    std::cout << "> Parsing " << filename << " failed!" << std::endl;
+  }
+
+  delete[] buffer;
+}
+
+void FileTest() {
+  TestParseFile("data/simple.json");
+}
+
 int main() {
-  MainTest();
+  CaseTest();
   printf("%d/%d (%3.2f%%) Passed\n",
     gTestPass,
     gTestTotal,
     gTestPass * 100.0 / gTestTotal
   );
+  FileTest();
   return gResult;
 }

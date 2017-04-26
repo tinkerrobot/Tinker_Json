@@ -10,7 +10,7 @@
 #include "../header/noob-value.h"
 
 /*
- * Public functions
+ * Constructors and destructors
  */
 
 NoobValue::NoobValue() {
@@ -32,59 +32,23 @@ void NoobValue::NoobSetType(NoobType type) {
 }
 
 bool NoobValue::NoobGetBoolean() const {
-  if(_type == kNoobTrue) {
-    return true;
-  } else if(_type == kNoobFalse) {
-    return false;
-  } else {
-    printf("ERROR: Try to access the boolean value of a non-boolean object!\n");
-    exit(-1);
-  }
+  return boolean();
 }
 
 double NoobValue::NoobGetNumber() const {
-  if(_type == kNoobNumber) {
-    return _value._number;
-  } else {
-    printf("ERROR: Try to access the numeric value of a non-number object!\n");
-    exit(-1);
-  }
+  return number();
 }
 
-const std::string* NoobValue::NoobGetString() const {
-  if(_type == kNoobString) {
-    return _value._string;
-  } else {
-    printf("ERROR: Try to access the string value of a non-string object!\n");
-    exit(-1);
-  }
+const std::string& NoobValue::NoobGetString() const {
+  return string();
 }
 
 size_t NoobValue::NoobGetStringLength() const {
-  if(_type == kNoobString) {
-    return (_value._string)->length();
-  } else {
-    printf("ERROR: Try to access the string length of a non-string object!\n");
-    exit(-1);
-  }
+  return length();
 }
 
-NoobValue* NoobValue::NoobGetArrayElement(size_t index) const {
-  if(_type == kNoobArray) {
-    return (_value._array)->at(index);
-  } else {
-    printf("ERROR: Try to access the element of a non-array object!\n");
-    exit(-1);
-  }
-}
-
-NoobValue* NoobValue::operator[](size_t index) const {
-  if(_type == kNoobArray) {
-    return (_value._array)->at(index);
-  } else {
-    printf("ERROR: Try to access the element of a non-array object!\n");
-    exit(-1);
-  }
+const NoobValue& NoobValue::NoobGetArrayElement(size_t index) const {
+  return at(index);
 }
 
 size_t NoobValue::NoobGetArraySize() const {
@@ -97,43 +61,15 @@ size_t NoobValue::NoobGetArraySize() const {
 }
 
 size_t NoobValue::NoobGetObjectSize() const {
-  if(_type == kNoobObject) {
-    return (_value._object)->size();
-  } else {
-    printf("ERROR: Try to access the size of a non-object object!\n");
-    exit(-1);
-  }
+  return array_size();
 }
 
 bool NoobValue::NoobHasKey(const std::string &key) const {
-  if(_type == kNoobObject) {
-    return ((_value._object)->count(key) > 0);
-  } else {
-    printf("ERROR: Try to access the key of a non-object object!\n");
-    exit(-1);
-  }
+  return has_key(key);
 }
 
-NoobValue* NoobValue::NoobGetObjectValue(const std::string &key) const {
-  if(_type == kNoobObject) {
-    return (_value._object)->at(key);
-  } else {
-    printf("ERROR: Try to access the element of a non-object object!\n");
-    exit(-1);
-  }
-}
-
-NoobValue* NoobValue::operator[](const std::string &key) const {
-  if(_type == kNoobObject) {
-    if((_value._object)->count(key)) {
-      return (_value._object)->at(key);
-    } else {
-      return nullptr;
-    }
-  } else {
-    printf("ERROR: Try to access the element of a non-object object!\n");
-    exit(-1);
-  }
+const NoobValue& NoobValue::NoobGetObjectValue(const std::string &key) const {
+  return at(key);
 }
 
 NoobReturnValue NoobValue::NoobParse(const char *json) {

@@ -10,5 +10,5 @@ set(SOURCE_FILES
 
   main.cpp
   source/noob-value.cpp
-  )
+  source/noob-accessor.cpp)
 add_executable(Noob_Json_Parser ${SOURCE_FILES})
