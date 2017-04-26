@@ -30,60 +30,33 @@ NoobValue::~NoobValue() {
   NoobFree();
 }
 
-NoobType NoobValue::NoobGetType() const {
-  return _type;
-}
+NoobType NoobValue::NoobGetType() const { return _type; }
 
-void NoobValue::NoobSetType(NoobType type) {
-  _type = type;
-}
+void NoobValue::NoobSetType(NoobType type) { _type = type; }
 
-bool NoobValue::NoobGetBoolean() const {
-  return boolean();
-}
+bool NoobValue::NoobGetBoolean() const { return boolean(); }
 
-double NoobValue::NoobGetNumber() const {
-  return number();
-}
+double NoobValue::NoobGetNumber() const { return number(); }
 
-const std::string& NoobValue::NoobGetString() const {
-  return string();
-}
+const std::string& NoobValue::NoobGetString() const { return string(); }
 
-size_t NoobValue::NoobGetStringLength() const {
-  return length();
-}
+size_t NoobValue::NoobGetStringLength() const { return length(); }
 
-const NoobValue& NoobValue::NoobGetArrayElement(size_t index) const {
-  return at(index);
-}
+const NoobValue& NoobValue::NoobGetArrayElement(size_t index) const { return at(index); }
 
-size_t NoobValue::NoobGetArraySize() const {
-  if(_type == kNoobArray) {
-    return (_value._array)->size();
-  } else {
-    printf("ERROR: Try to access the element of a non-array object!\n");
-    exit(-1);
-  }
-}
+size_t NoobValue::NoobGetArraySize() const { return array_size(); }
 
-size_t NoobValue::NoobGetObjectSize() const {
-  return array_size();
-}
+size_t NoobValue::NoobGetObjectSize() const { return object_size(); }
 
-bool NoobValue::NoobHasKey(const std::string &key) const {
-  return has_key(key);
-}
+bool NoobValue::NoobHasKey(const std::string &key) const { return has_key(key); }
 
-const NoobValue& NoobValue::NoobGetObjectValue(const std::string &key) const {
-  return at(key);
-}
+const NoobValue& NoobValue::NoobGetObjectValue(const std::string &key) const { return at(key); }
 
 NoobReturnValue NoobValue::NoobParse(const char *json) {
   NoobFree();
   _json = json;
   _type = kNoobNull;
-  NoobReturnValue result = kNoobInvalidValue;
+  NoobReturnValue result;
   NoobParseWhitespace();
   result = NoobParseValue();
   if(result == kNoobOk) {
@@ -154,10 +127,8 @@ void NoobValue::NoobSetString(const char *str, size_t length) {
 
 void NoobValue::NoobParseWhitespace() {
   const char *pointer = _json;
-  while(*pointer == ' ' ||
-    *pointer == '\t' ||
-    *pointer == '\n' ||
-    *pointer == '\r') {
+  while(*pointer == ' ' || *pointer == '\t' ||
+    *pointer == '\n' || *pointer == '\r') {
     ++pointer;
   }
   _json = pointer;
@@ -165,30 +136,14 @@ void NoobValue::NoobParseWhitespace() {
 
 NoobReturnValue NoobValue::NoobParseValue() {
   switch(*_json) {
-    case 'n': {
-      return NoobParseLiteral("null", kNoobNull);
-    }
-    case 't': {
-      return NoobParseLiteral("true", kNoobTrue);
-    }
-    case 'f': {
-      return NoobParseLiteral("false", kNoobFalse);
-    }
-    case '"': {
-      return NoobParseString();
-    }
-    case '[': {
-      return NoobParseArray();
-    }
-    case '{': {
-      return NoobParseObject();
-    }
-    case '\0': {
-      return kNoobExpectValue;
-    }
-    default: {
-      return NoobParseNumber();
-    }
+    case 'n': return NoobParseLiteral("null", kNoobNull);
+    case 't': return NoobParseLiteral("true", kNoobTrue);
+    case 'f': return NoobParseLiteral("false", kNoobFalse);
+    case '"': return NoobParseString();
+    case '[': return NoobParseArray();
+    case '{': return NoobParseObject();
+    case '\0': return kNoobExpectValue;
+    default: return NoobParseNumber();
   }
 }
 
@@ -213,39 +168,23 @@ inline bool IsDigit1To9(char ch) {
 
 NoobReturnValue NoobValue::NoobParseNumber() {
   const char *pointer = _json;
-  if(*pointer == '-') {
-    pointer++;
-  }
+  if(*pointer == '-') pointer++;
   if(*pointer == '0') {
     pointer++;
   } else {
-    if(!IsDigit1To9(*pointer)) {
-      return kNoobInvalidValue;
-    }
-    do {
-      pointer++;
-    } while(IsDigit(*pointer));
+    if(!IsDigit1To9(*pointer)) return kNoobInvalidValue;
+    do pointer++; while(IsDigit(*pointer));
   }
   if(*pointer == '.') {
     pointer++;
-    if(!IsDigit(*pointer)) {
-      return kNoobInvalidValue;
-    }
-    do {
-      pointer++;
-    } while(IsDigit(*pointer));
+    if(!IsDigit(*pointer)) return kNoobInvalidValue;
+    do pointer++; while(IsDigit(*pointer));
   }
   if(*pointer == 'e' || *pointer == 'E') {
     pointer++;
-    if(*pointer == '+' || *pointer == '-') {
-      pointer++;
-    }
-    if(!IsDigit(*pointer)) {
-      return kNoobInvalidValue;
-    }
-    do {
-      pointer++;
-    } while(IsDigit(*pointer));
+    if(*pointer == '+' || *pointer == '-') pointer++;
+    if(!IsDigit(*pointer)) return kNoobInvalidValue;
+    do pointer++; while(IsDigit(*pointer));
   }
 
   errno = 0;
@@ -265,32 +204,25 @@ const char* NoobValue::NoobParseHex4(const char *pointer, unsigned *u) {
   for (int i = 0; i < 4; ++i) {
     char ch = *pointer++;
     *u <<= 4;
-    if(ch >= '0' && ch <= '9') {
-      *u |= ch - '0';
-    } else if(ch >= 'A' && ch <= 'F') {
-      *u |= ch - ('A' - 10);
-    } else if(ch >= 'a' && ch <= 'f') {
-      *u |= ch - ('a' - 10);
-    } else {
-      return NULL;
-    }
+    if(ch >= '0' && ch <= '9') *u |= ch - '0';
+    else if(ch >= 'A' && ch <= 'F') *u |= ch - ('A' - 10);
+    else if(ch >= 'a' && ch <= 'f') *u |= ch - ('a' - 10);
+    else return NULL;
   }
   return pointer;
 }
 
 void NoobValue::NoobEncodeUtf8(std::string *str, unsigned u) {
-  if (u <= 0x7F)
+  if (u <= 0x7F) {
     str->push_back(u & 0xFF);
-  else if (u <= 0x7FF) {
+  } else if (u <= 0x7FF) {
     str->push_back(0xC0 | ((u >> 6) & 0xFF));
     str->push_back(0x80 | ( u       & 0x3F));
-  }
-  else if (u <= 0xFFFF) {
+  } else if (u <= 0xFFFF) {
     str->push_back(0xE0 | ((u >> 12) & 0xFF));
     str->push_back(0x80 | ((u >>  6) & 0x3F));
     str->push_back(0x80 | ( u        & 0x3F));
-  }
-  else {
+  } else {
     str->push_back(0xF0 | ((u >> 18) & 0xFF));
     str->push_back(0x80 | ((u >> 12) & 0x3F));
     str->push_back(0x80 | ((u >>  6) & 0x3F));
@@ -372,7 +304,7 @@ NoobReturnValue NoobValue::NoobParseStringRaw(std::string *str) {
 
 NoobReturnValue NoobValue::NoobParseString() {
   NoobFree();
-  NoobReturnValue result = kNoobInvalidValue;
+  NoobReturnValue result;
   _value._string = new std::string();
   result = NoobParseStringRaw(_value._string);
   if(result == kNoobOk) {
@@ -383,7 +315,7 @@ NoobReturnValue NoobValue::NoobParseString() {
 
 NoobReturnValue NoobValue::NoobParseArray() {
   _json++;
-  NoobReturnValue result = kNoobInvalidValue;
+  NoobReturnValue result;
   NoobFree();
   _value._array = new std::vector<NoobValue *>();
   NoobParseWhitespace();
@@ -427,7 +359,7 @@ NoobReturnValue NoobValue::NoobParseArray() {
 
 NoobReturnValue NoobValue::NoobParseObject() {
   _json++;
-  NoobReturnValue result = kNoobInvalidValue;
+  NoobReturnValue result;
   NoobFree();
   _value._object = new std::unordered_map<std::string, NoobValue *>();
   NoobParseWhitespace();

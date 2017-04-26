@@ -80,8 +80,8 @@ const NoobValue& NoobValue::operator[](size_t index) const {
 }
 
 size_t NoobValue::array_size() const {
-  if(_type == kNoobObject) {
-    return (_value._object)->size();
+  if(_type == kNoobArray) {
+    return (_value._array)->size();
   } else {
     printf("ERROR: Try to access the size of a non-object object!\n");
     exit(-1);
@@ -109,6 +109,15 @@ const NoobValue& NoobValue::at(const std::string &key) const {
 const NoobValue& NoobValue::operator[](const std::string &key) const {
   if(_type == kNoobObject) {
     return *((_value._object)->at(key));
+  } else {
+    printf("ERROR: Try to access the element of a non-object object!\n");
+    exit(-1);
+  }
+}
+
+size_t NoobValue::object_size() const {
+  if(_type == kNoobObject) {
+    return (_value._object)->size();
   } else {
     printf("ERROR: Try to access the element of a non-object object!\n");
     exit(-1);

@@ -30,6 +30,7 @@ class NoobValue {
   bool has_key(const std::string &key) const;
   const NoobValue& at(const std::string &key) const;
   const NoobValue& operator[](const std::string &key) const;
+  size_t object_size() const;
 
   NoobType NoobGetType() const;
   void NoobSetType(NoobType type);
