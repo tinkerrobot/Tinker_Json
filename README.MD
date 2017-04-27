@@ -6,9 +6,12 @@ v 1.0.0
 
 ## Build status
 
-| Linux        | Mac OS       |
-| :----------: | :----------: |
-| ![Travis](https://img.shields.io/travis/rust-lang/rust.svg) | ![Travis](https://img.shields.io/travis/rust-lang/rust.svg) |
+| GCC             | Clang           |
+| :-------------: | :-------------: |
+| ![linux-stauts] | ![macos-status] |
+
+[linux-status]: https://travis-ci.org/lilinsanity/Noob-Json-Parser.svg?branch=master "Travis build status"
+[macos-status]: https://travis-ci.org/lilinsanity/Noob-Json-Parser.svg?branch=master "Travis build status"
 
 ## Introduction
 
