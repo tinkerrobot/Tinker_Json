@@ -4,6 +4,9 @@ compiler:
     - clang
     - gcc
 
+cmake:
+    - 3.8
+
 install: true
 
 script:
