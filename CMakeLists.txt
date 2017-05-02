@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.7)
+
 project(Noob_Json_Parser)
 
 set(CMAKE_CXX_STANDARD 11)

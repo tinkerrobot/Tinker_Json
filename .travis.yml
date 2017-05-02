@@ -6,6 +6,11 @@ compiler:
 
 dist: trusty
 
+addons:
+    apt:
+        packages:
+            - cmake
+
 script:
     - cmake CMakeLists.txt
     - make
