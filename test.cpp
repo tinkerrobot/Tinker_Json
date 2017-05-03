@@ -74,6 +74,15 @@ int gTestPass = 0;
     TestEqualString(expect, v.GetString().c_str(), v.GetLength());\
   } while(0)
 
+#define TestRoundtrip(json)\
+    do {\
+        NoobValue v;\
+        std::string json2;\
+        TestEqualInt(kNoobOk, v.Parse(json));\
+        TestEqualInt(kNoobOk, v.Stringify(json2));\
+        TestEqualString(json, json2.c_str(), json2.length());\
+    } while(0)
+
 #define TestTrue(actual) TestEqualBase((actual) != 0, "true", "false")
 #define TestFalse(actual) TestEqualBase((actual) == 0, "false", "true")
 
@@ -313,6 +322,60 @@ static void TestParseIllegalObject() {
   TestError(kNoobMissCommaOrCurlyBracket, "{\"a\":{}");
 }
 
+static void TestStringifyLiteral() {
+  TestRoundtrip("null");
+  TestRoundtrip("false");
+  TestRoundtrip("true");
+}
+
+static void TestStringifyNumber() {
+  TestRoundtrip("0");
+  TestRoundtrip("-0");
+  TestRoundtrip("1");
+  TestRoundtrip("-1");
+  TestRoundtrip("1.5");
+  TestRoundtrip("-1.5");
+  TestRoundtrip("3.25");
+  TestRoundtrip("1e+20");
+  TestRoundtrip("1.234e+20");
+  TestRoundtrip("1.234e-20");
+
+  TestRoundtrip("1.0000000000000002"); /* the smallest number > 1 */
+  TestRoundtrip("4.9406564584124654e-324"); /* minimum denormal */
+  TestRoundtrip("-4.9406564584124654e-324");
+  TestRoundtrip("2.2250738585072009e-308");  /* Max subnormal double */
+  TestRoundtrip("-2.2250738585072009e-308");
+  TestRoundtrip("2.2250738585072014e-308");  /* Min normal positive double */
+  TestRoundtrip("-2.2250738585072014e-308");
+  TestRoundtrip("1.7976931348623157e+308");  /* Max double */
+  TestRoundtrip("-1.7976931348623157e+308");
+}
+
+static void TestStringifyString() {
+  TestRoundtrip("\"\"");
+  TestRoundtrip("\"Hello\"");
+  TestRoundtrip("\"Hello\\nWorld\"");
+  TestRoundtrip("\"\\\" \\\\ / \\b \\f \\n \\r \\t\"");
+  TestRoundtrip("\"Hello\\u0000World\"");
+}
+
+static void TestStringifyArray() {
+  TestRoundtrip("[]");
+  TestRoundtrip("[null,false,true,123,\"abc\",[1,2,3]]");
+}
+
+static void TestStringifyObject() {
+  TestRoundtrip("{}");
+
+  /*
+   * Note that the generator cannot pass this test
+   * Because the orders of the object's members are not the same
+   * Between the original JSON text and the generated JSON text.
+   * However, the NoobValue trees of the two JSON texts are identical.
+   */
+  // TestRoundtrip("{\"n\":null,\"f\":false,\"t\":true,\"i\":123,\"s\":\"abc\",\"a\":[1,2,3],\"o\":{\"1\":1,\"2\":2,\"3\":3}}");
+}
+
 void CaseTest() {
   TestParseLiteral();
   TestParseNumber();
@@ -325,6 +388,11 @@ void CaseTest() {
   TestParseIllegalUnicode();
   TestParseIllegalArray();
   TestParseIllegalObject();
+  TestStringifyLiteral();
+  TestStringifyNumber();
+  TestStringifyString();
+  TestStringifyArray();
+  TestStringifyObject();
 }
 
 static double TestParseFile(const char *filename) {
@@ -343,6 +411,8 @@ static double TestParseFile(const char *filename) {
   clock_t start, end;
   start = clock();
   NoobReturnValue result = v.Parse(buffer);
+  std::string str;
+  v.Stringify(str);
   end = clock();
   if(result == kNoobOk) {
     time_used = ((double)(end - start) / CLOCKS_PER_SEC) * 1000;
@@ -352,6 +422,7 @@ static double TestParseFile(const char *filename) {
     time_used = -1.0;
     printf("> Parsing %s failed!\n", filename);
   }
+  std::cout << str << std::endl;
 
   delete[] buffer;
   is.close();
@@ -359,6 +430,7 @@ static double TestParseFile(const char *filename) {
 }
 
 void FileTest() {
+  /*
   const char *files[] = {
     "data/twitter.json",
     "data/canada.json",
@@ -384,8 +456,10 @@ void FileTest() {
       printf(">>>>>>>>>>>>>>>>>>>>>>>>\n\n");
     }
   }
+   */
+  TestParseFile("data/simple.json");
 }
-
+/*
 int main() {
   CaseTest();
   printf("%d/%d (%3.2f%%) Passed\n",
@@ -395,4 +469,26 @@ int main() {
   );
   FileTest();
   return gResult;
+}
+*/
+
+
+int main() {
+  const char* json = "{\"project\":\"NoobJson\",\"stars\":1}";
+  NoobValue v;
+  v.Parse(json);
+
+  const NoobValue &p = v["project"];
+  std::cout << "Type: " << p.GetTypeString() << std::endl;
+  std::cout << "Value: " << p.GetString() << std::endl;
+
+  const NoobValue &s = v["stars"];
+  std::cout << "Type: " << s.GetTypeString() << std::endl;
+  std::cout << "Value: " << s.GetNumber() << std::endl;
+
+  std::string str;
+  v.Stringify(str);
+  std::cout << "JSON Text: " << str << std::endl;
+
+  return 0;
 }

@@ -18,6 +18,7 @@
 class NoobValue {
  public:
   NoobValue();
+  NoobValue(const char *json);
   ~NoobValue();
 
   // Type wrapper
@@ -56,9 +57,13 @@ class NoobValue {
   // Parse json texts
   NoobReturnValue Parse(const char *json);
 
+  // Stringify json values
+  NoobReturnValue Stringify(std::string &text) const;
+
  private:
   void Free();
 
+  // JSON text parser
   void ParseWhitespace();
   NoobReturnValue ParseValue();
   NoobReturnValue ParseLiteral(const char *literal, NoobType type);
@@ -70,6 +75,14 @@ class NoobValue {
   NoobReturnValue ParseArray();
   NoobReturnValue ParseObject();
 
+  // JSON value stringifier
+  NoobReturnValue StringifyLiteral(const char *literal, std::string &text) const;
+  NoobReturnValue StringifyNumber(std::string &text) const;
+  NoobReturnValue StringifyString(std::string &text) const;
+  NoobReturnValue StringifyArray(std::string &text) const;
+  NoobReturnValue StringifyObject(std::string &text) const;
+
+  // Data members
   NoobType _type;
   const char *_json;
   union {

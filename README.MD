@@ -51,7 +51,7 @@ int main() {
 
   const NoobValue &p = v["project"];
   std::cout << "Type: " << p.GetTypeString() << std::endl;
-  std::cout << "Value: " << p.GetSring() << std::endl;
+  std::cout << "Value: " << p.GetString() << std::endl;
 
   const NoobValue &s = v["stars"];
   std::cout << "Type: " << s.GetTypeString() << std::endl;
@@ -72,6 +72,7 @@ Type: String
 Value: NoobJson
 Type: Number
 Value: 1
+JSON Text: {"stars":1,"project":"NoobJson"}
 ```
 
 ## Coding Environment
