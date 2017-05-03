@@ -47,7 +47,7 @@ Below is a simple example on how to parse a JSON string into a document, and get
 int main() {
   const char* json = "{\"project\":\"NoobJson\",\"stars\":1}";
   NoobValue v;
-  v.NoobParse(json);
+  v.Parse(json);
 
   const NoobValue &p = v["project"];
   std::cout << "Type: " << p.type() << std::endl;

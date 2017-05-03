@@ -54,25 +54,24 @@ int gTestPass = 0;
 #define TestNumber(expect, json)\
   do {\
     NoobValue v;\
-    TestEqualInt(kNoobOk, v.NoobParse(json));\
-    TestEqualInt(kNoobNumber, v.NoobGetType());\
-    TestEqualDouble(expect, v.NoobGetNumber());\
+    TestEqualInt(kNoobOk, v.Parse(json));\
+    TestEqualInt(kNoobNumber, v.GetType());\
+    TestEqualDouble(expect, v.GetNumber());\
   } while(0)
 
 #define TestError(error, json)\
   do {\
     NoobValue v;\
-    v.NoobSetType(kNoobFalse);\
-    TestEqualInt(error, v.NoobParse(json));\
-    TestEqualInt(kNoobNull, v.NoobGetType());\
+    TestEqualInt(error, v.Parse(json));\
+    TestEqualInt(kNoobNull, v.GetType());\
   } while(0)
 
 #define TestString(expect, json)\
   do {\
     NoobValue v;\
-    TestEqualInt(kNoobOk, v.NoobParse(json));\
-    TestEqualInt(kNoobString, v.NoobGetType());\
-    TestEqualString(expect, v.NoobGetString().c_str(), v.NoobGetStringLength());\
+    TestEqualInt(kNoobOk, v.Parse(json));\
+    TestEqualInt(kNoobString, v.GetType());\
+    TestEqualString(expect, v.GetString().c_str(), v.GetLength());\
   } while(0)
 
 #define TestTrue(actual) TestEqualBase((actual) != 0, "true", "false")
@@ -84,12 +83,12 @@ int gTestPass = 0;
 
 static void TestParseLiteral() {
   NoobValue v;
-  TestEqualInt(kNoobOk, v.NoobParse("null"));
-  TestEqualInt(kNoobNull, v.NoobGetType());
-  TestEqualInt(kNoobOk, v.NoobParse("true"));
-  TestEqualInt(kNoobTrue, v.NoobGetType());
-  TestEqualInt(kNoobOk, v.NoobParse("false"));
-  TestEqualInt(kNoobFalse, v.NoobGetType());
+  TestEqualInt(kNoobOk, v.Parse("null"));
+  TestEqualInt(kNoobNull, v.GetType());
+  TestEqualInt(kNoobOk, v.Parse("true"));
+  TestEqualInt(kNoobTrue, v.GetType());
+  TestEqualInt(kNoobOk, v.Parse("false"));
+  TestEqualInt(kNoobFalse, v.GetType());
 }
 
 static void TestParseNumber() {
@@ -139,34 +138,34 @@ static void TestParseString() {
 
 static void TestParseArray() {
   NoobValue v;
-  TestEqualInt(kNoobOk, v.NoobParse("[ ]"));
-  TestEqualInt(kNoobArray, v.NoobGetType());
-  TestEqualInt(0, v.NoobGetArraySize());
+  TestEqualInt(kNoobOk, v.Parse("[ ]"));
+  TestEqualInt(kNoobArray, v.GetType());
+  TestEqualInt(0, v.GetArraySize());
 
-  TestEqualInt(kNoobOk, v.NoobParse("[ null , false , true , 123 , \"abc\" ]"));
-  TestEqualInt(kNoobArray, v.NoobGetType());
-  TestEqualInt(5, v.NoobGetArraySize());
-  TestEqualInt(kNoobNull,   v[0].NoobGetType());
-  TestEqualInt(kNoobFalse,  v[1].NoobGetType());
-  TestEqualInt(kNoobTrue,   v[2].NoobGetType());
-  TestEqualInt(kNoobNumber, v[3].NoobGetType());
-  TestEqualInt(kNoobString, v[4].NoobGetType());
-  TestEqualDouble(123.0, v[3].NoobGetNumber());
+  TestEqualInt(kNoobOk, v.Parse("[ null , false , true , 123 , \"abc\" ]"));
+  TestEqualInt(kNoobArray, v.GetType());
+  TestEqualInt(5, v.GetArraySize());
+  TestEqualInt(kNoobNull, v[0].GetType());
+  TestEqualInt(kNoobFalse, v[1].GetType());
+  TestEqualInt(kNoobTrue, v[2].GetType());
+  TestEqualInt(kNoobNumber, v[3].GetType());
+  TestEqualInt(kNoobString, v[4].GetType());
+  TestEqualDouble(123.0, v[3].GetNumber());
   TestEqualString("abc",
-    v[4].NoobGetString().c_str(),
-    v[4].NoobGetStringLength());
+    v[4].GetString().c_str(),
+    v[4].GetLength());
 
-  TestEqualInt(kNoobOk, v.NoobParse("[ [ ] , [ 0 ] , [ 0 , 1 ] , [ 0 , 1 , 2 ] ]"));
-  TestEqualInt(kNoobArray, v.NoobGetType());
-  TestEqualInt(4, v.NoobGetArraySize());
+  TestEqualInt(kNoobOk, v.Parse("[ [ ] , [ 0 ] , [ 0 , 1 ] , [ 0 , 1 , 2 ] ]"));
+  TestEqualInt(kNoobArray, v.GetType());
+  TestEqualInt(4, v.GetArraySize());
   for (int i = 0; i < 4; i++) {
     const NoobValue &a = v[i];
-    TestEqualInt(kNoobArray, a.NoobGetType());
-    TestEqualInt(i, a.NoobGetArraySize());
+    TestEqualInt(kNoobArray, a.GetType());
+    TestEqualInt(i, a.GetArraySize());
     for (int j = 0; j < i; j++) {
       const NoobValue &e = a[j];
-      TestEqualInt(kNoobNumber, e.NoobGetType());
-      TestEqualDouble((double)j, e.NoobGetNumber());
+      TestEqualInt(kNoobNumber, e.GetType());
+      TestEqualDouble((double)j, e.GetNumber());
     }
   }
 }
@@ -174,11 +173,11 @@ static void TestParseArray() {
 static void TestParseObject() {
   NoobValue v;
 
-  TestEqualInt(kNoobOk, v.NoobParse(" { } "));
-  TestEqualInt(kNoobObject, v.NoobGetType());
-  TestEqualInt(0, v.NoobGetObjectSize());
+  TestEqualInt(kNoobOk, v.Parse(" { } "));
+  TestEqualInt(kNoobObject, v.GetType());
+  TestEqualInt(0, v.GetObjectSize());
 
-  TestEqualInt(kNoobOk, v.NoobParse(
+  TestEqualInt(kNoobOk, v.Parse(
     " { "
       "\"n\" : null , "
       "\"f\" : false , "
@@ -189,40 +188,40 @@ static void TestParseObject() {
       "\"o\" : { \"1\" : 1, \"2\" : 2, \"3\" : 3 }"
       " } "
   ));
-  TestEqualInt(kNoobObject, v.NoobGetType());
-  TestEqualInt(7, v.NoobGetObjectSize());
-  TestTrue(v.NoobHasKey("n"));
-  TestEqualInt(kNoobNull, v.NoobGetObjectValue("n").NoobGetType());
-  TestTrue(v.NoobHasKey("f"));
-  TestEqualInt(kNoobFalse, v.NoobGetObjectValue("f").NoobGetType());
-  TestTrue(v.NoobHasKey("t"));
-  TestEqualInt(kNoobTrue, v.NoobGetObjectValue("t").NoobGetType());
-  TestTrue(v.NoobHasKey("i"));
-  TestEqualInt(kNoobNumber, v.NoobGetObjectValue("i").NoobGetType());
-  TestEqualDouble(123.0, v.NoobGetObjectValue("i").NoobGetNumber());
-  TestTrue(v.NoobHasKey("s"));
-  TestEqualInt(kNoobString, v.NoobGetObjectValue("s").NoobGetType());
+  TestEqualInt(kNoobObject, v.GetType());
+  TestEqualInt(7, v.GetObjectSize());
+  TestTrue(v.HasKey("n"));
+  TestEqualInt(kNoobNull, v.GetValue("n").GetType());
+  TestTrue(v.HasKey("f"));
+  TestEqualInt(kNoobFalse, v.GetValue("f").GetType());
+  TestTrue(v.HasKey("t"));
+  TestEqualInt(kNoobTrue, v.GetValue("t").GetType());
+  TestTrue(v.HasKey("i"));
+  TestEqualInt(kNoobNumber, v.GetValue("i").GetType());
+  TestEqualDouble(123.0, v.GetValue("i").GetNumber());
+  TestTrue(v.HasKey("s"));
+  TestEqualInt(kNoobString, v.GetValue("s").GetType());
   TestEqualString("abc",
-    v.NoobGetObjectValue("s").NoobGetString().c_str(),
-    v.NoobGetObjectValue("s").NoobGetString().length()
+    v.GetValue("s").GetString().c_str(),
+    v.GetValue("s").GetString().length()
   );
-  TestTrue(v.NoobHasKey("a"));
-  TestEqualInt(kNoobArray, v.NoobGetObjectValue("a").NoobGetType());
-  TestEqualInt(3, v.NoobGetObjectValue("a").NoobGetArraySize());
+  TestTrue(v.HasKey("a"));
+  TestEqualInt(kNoobArray, v.GetValue("a").GetType());
+  TestEqualInt(3, v.GetValue("a").GetArraySize());
   for (size_t i = 0; i < 3; i++) {
-    const NoobValue& e = v.NoobGetObjectValue("a").NoobGetArrayElement(i);
-    TestEqualInt(kNoobNumber, e.NoobGetType());
-    TestEqualDouble(i + 1.0, e.NoobGetNumber());
+    const NoobValue& e = v.GetValue("a").GetElement(i);
+    TestEqualInt(kNoobNumber, e.GetType());
+    TestEqualDouble(i + 1.0, e.GetNumber());
   }
-  TestTrue(v.NoobHasKey("o"));
+  TestTrue(v.HasKey("o"));
   {
-    const NoobValue &o = v.NoobGetObjectValue("o");
-    TestEqualInt(kNoobObject, o.NoobGetType());
+    const NoobValue &o = v.GetValue("o");
+    TestEqualInt(kNoobObject, o.GetType());
     std::string key[] = {"1", "2", "3"};
     for (size_t i = 0; i < 3; i++) {
-      const NoobValue &ov = o.NoobGetObjectValue(key[i]);
-      TestEqualInt(kNoobNumber, ov.NoobGetType());
-      TestEqualDouble(i + 1.0, ov.NoobGetNumber());
+      const NoobValue &ov = o.GetValue(key[i]);
+      TestEqualInt(kNoobNumber, ov.GetType());
+      TestEqualDouble(i + 1.0, ov.GetNumber());
     }
   }
 }
@@ -343,7 +342,7 @@ static double TestParseFile(const char *filename) {
   double time_used = 0.0;
   clock_t start, end;
   start = clock();
-  NoobReturnValue result = v.NoobParse(buffer);
+  NoobReturnValue result = v.Parse(buffer);
   end = clock();
   if(result == kNoobOk) {
     time_used = ((double)(end - start) / CLOCKS_PER_SEC) * 1000;
@@ -361,9 +360,9 @@ static double TestParseFile(const char *filename) {
 
 void FileTest() {
   const char *files[] = {
-    "test/twitter.json",
-    "test/canada.json",
-    "test/citm_catalog.json",
+    "data/twitter.json",
+    "data/canada.json",
+    "data/citm_catalog.json",
   };
 
   for(int j = 0; j < 3; ++j) {

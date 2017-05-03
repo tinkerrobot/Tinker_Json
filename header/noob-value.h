@@ -20,55 +20,55 @@ class NoobValue {
   NoobValue();
   ~NoobValue();
 
-  const char* type() const;
-  NoobType type_val() const;
-  bool boolean() const;
-  double number() const;
-  const std::string& string() const;
-  size_t length() const;
-  const NoobValue& at(size_t index) const;
-  const NoobValue& operator[](size_t index) const;
-  size_t array_size() const;
-  bool has_key(const std::string &key) const;
-  const NoobValue& at(const std::string &key) const;
-  const NoobValue& operator[](const std::string &key) const;
-  size_t object_size() const;
+  // Type wrapper
+  NoobType GetType() const;
+  const char* GetTypeString() const;
 
-  NoobType NoobGetType() const;
-  void NoobSetType(NoobType type);
-  bool NoobGetBoolean() const;
-  double NoobGetNumber() const;
-  const std::string& NoobGetString() const;
-  size_t NoobGetStringLength() const;
-  const NoobValue& NoobGetArrayElement(size_t index) const;
-  size_t NoobGetArraySize() const;
-  size_t NoobGetObjectSize() const;
-  bool NoobHasKey(const std::string &key) const;
-  const NoobValue& NoobGetObjectValue(const std::string &key) const;
+  // Boolean member wrapper
+  bool GetBoolean() const;
+  void SetBoolean(bool boolean);
 
-  NoobReturnValue NoobParse(const char *json);
+  // Numeric member wrapper
+  double GetNumber() const;
+  void SetNumber(double number);
+
+  // String member wrapper
+  std::string& GetString() const;
+  size_t GetLength() const;
+  void SetString(std::string &str);
+  void SetString(const char *str, size_t length);
+
+  // Array member wrapper
+  NoobValue& GetElement(size_t index) const;
+  size_t GetArraySize() const;
+  void SetArray(std::vector<NoobValue *> &vec);
+
+  // Object member wrapper
+  NoobValue& GetValue(const std::string &key) const;
+  bool HasKey(const std::string &key) const;
+  size_t GetObjectSize() const;
+  void SetObject(std::unordered_map<std::string, NoobValue *> &obj);
+
+  // Operator overloading
+  NoobValue& operator[] (size_t index) const;
+  NoobValue& operator[] (const std::string &key) const;
+
+  // Parse json texts
+  NoobReturnValue Parse(const char *json);
 
  private:
-  void NoobFree();
+  void Free();
 
-  void NoobSetBoolean(bool boolean);
-  void NoobSetNumber(double number);
-  void NoobSetString(std::string *str);
-  void NoobSetString(std::string &str);
-  void NoobSetString(const char *str, size_t length);
-  // void NoobSetArray(std::vector<NoobValue *> *vec);
-  // void NoobSetArray(std::vector<NoobValue *> &vec);
-
-  void NoobParseWhitespace();
-  NoobReturnValue NoobParseValue();
-  NoobReturnValue NoobParseLiteral(const char* literal, NoobType type);
-  NoobReturnValue NoobParseNumber();
-  const char* NoobParseHex4(const char *pointer, unsigned *u);
-  void NoobEncodeUtf8(std::string *str, unsigned u);
-  NoobReturnValue NoobParseStringRaw(std::string *str);
-  NoobReturnValue NoobParseString();
-  NoobReturnValue NoobParseArray();
-  NoobReturnValue NoobParseObject();
+  void ParseWhitespace();
+  NoobReturnValue ParseValue();
+  NoobReturnValue ParseLiteral(const char *literal, NoobType type);
+  NoobReturnValue ParseNumber();
+  const char* ParseHex4(const char *pointer, unsigned *u);
+  void EncodeUtf8(std::string *str, unsigned u);
+  NoobReturnValue ParseStringRaw(std::string *str);
+  NoobReturnValue ParseString();
+  NoobReturnValue ParseArray();
+  NoobReturnValue ParseObject();
 
   NoobType _type;
   const char *_json;
