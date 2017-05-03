@@ -459,7 +459,7 @@ void FileTest() {
    */
   TestParseFile("data/simple.json");
 }
-/*
+
 int main() {
   CaseTest();
   printf("%d/%d (%3.2f%%) Passed\n",
@@ -469,26 +469,4 @@ int main() {
   );
   FileTest();
   return gResult;
-}
-*/
-
-
-int main() {
-  const char* json = "{\"project\":\"NoobJson\",\"stars\":1}";
-  NoobValue v;
-  v.Parse(json);
-
-  const NoobValue &p = v["project"];
-  std::cout << "Type: " << p.GetTypeString() << std::endl;
-  std::cout << "Value: " << p.GetString() << std::endl;
-
-  const NoobValue &s = v["stars"];
-  std::cout << "Type: " << s.GetTypeString() << std::endl;
-  std::cout << "Value: " << s.GetNumber() << std::endl;
-
-  std::string str;
-  v.Stringify(str);
-  std::cout << "JSON Text: " << str << std::endl;
-
-  return 0;
 }
