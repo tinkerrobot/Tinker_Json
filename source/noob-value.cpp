@@ -15,13 +15,12 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <header/noob-value.h>
 
 /**
  * Type & Status String Definitions
  */
 
-const char *NoobTypeString[] = {
+static const char *NoobTypeString[] = {
   "Null",
   "False",
   "True",
@@ -31,7 +30,7 @@ const char *NoobTypeString[] = {
   "Object"
 };
 
-const char *NoobStatusString[] = {
+static const char *NoobStatusString[] = {
   "Ok",
   "ExpectValue",
   "InvalidValue",
@@ -52,6 +51,12 @@ const char *NoobStatusString[] = {
  * Tool Functions
  */
 
+/*
+ * Since we do not suggest using exceptions in C++,
+ * If the users try to get the wrong type of value,
+ * The getter functions will call NoobCrash()
+ * And exit the program directly.
+ */
 void NoobCrash(const char *error_msg) {
   fprintf(stderr, "> ERROR: %s\n", error_msg);
   exit(31);
@@ -65,6 +70,13 @@ NoobValue::NoobValue() {
   _type = kNoobNull;
   _json = nullptr;
   _value._string = nullptr;
+}
+
+NoobValue::NoobValue(const char *json) {
+  _type = kNoobNull;
+  _json = nullptr;
+  _value._string = nullptr;
+  Parse(json);
 }
 
 NoobValue::~NoobValue() {
@@ -267,6 +279,40 @@ NoobReturnValue NoobValue::Parse(const char *json) {
     }
   }
   return result;
+}
+
+/**
+ * Stringify function
+ */
+
+NoobReturnValue NoobValue::Stringify(std::string &text) const {
+  std::string json;
+  switch(_type) {
+    case kNoobNull: {
+      return StringifyLiteral("null", text);
+    }
+    case kNoobTrue: {
+      return StringifyLiteral("true", text);
+    }
+    case kNoobFalse: {
+      return StringifyLiteral("false", text);
+    }
+    case kNoobNumber: {
+      return StringifyNumber(text);
+    }
+    case kNoobString: {
+      return StringifyString(text);
+    }
+    case kNoobArray: {
+      return StringifyArray(text);
+    }
+    case kNoobObject: {
+      return StringifyObject(text);
+    }
+    default: {
+      return kNoobInvalidValue;
+    }
+  }
 }
 
 /**
@@ -582,3 +628,86 @@ NoobReturnValue NoobValue::ParseObject() {
   _value._object = nullptr;
   return result;
 }
+
+NoobReturnValue NoobValue::StringifyLiteral(
+  const char *literal,
+  std::string &text) const {
+  text += literal;
+  return kNoobOk;
+}
+
+NoobReturnValue NoobValue::StringifyNumber(std::string &text) const {
+  char buffer[32];
+  sprintf(buffer, "%.17g", _value._number);
+  text += buffer;
+  return kNoobOk;
+}
+
+NoobReturnValue NoobValue::StringifyString(std::string &text) const {
+  static const char hex_digits[] = {
+    '0', '1', '2', '3',
+    '4', '5', '6', '7',
+    '8', '9', 'A', 'B',
+    'C', 'D', 'E', 'F'
+  };
+
+  text.push_back('\"');
+  size_t length = (_value._string)->length();
+  for(size_t i = 0; i < length; ++i) {
+    char ch = (_value._string)->at(i);
+    switch(ch) {
+      case '\"': text += "\\\""; break;
+      case '\\': text += "\\\\"; break;
+      case '\b': text += "\\b"; break;
+      case '\f': text += "\\f"; break;
+      case '\n': text += "\\n"; break;
+      case '\r': text += "\\r"; break;
+      case '\t': text += "\\t"; break;
+      default: {
+        if(ch < 0x20) {
+          text += "\\u00";
+          text.push_back(hex_digits[ch >> 4]);
+          text.push_back(hex_digits[ch & 15]);
+        } else {
+          text.push_back(ch);
+        }
+      }
+    }
+  }
+  text.push_back('\"');
+  return kNoobOk;
+}
+
+NoobReturnValue NoobValue::StringifyArray(std::string &text) const {
+  text.push_back('[');
+  size_t size = (_value._array)->size();
+  for(size_t i = 0; i < size; ++i) {
+    (_value._array)->at(i)->Stringify(text);
+    text += ",";
+  }
+  if(text.back() == ',') {
+    text.pop_back();
+  }
+  text.push_back(']');
+  return kNoobOk;
+}
+
+NoobReturnValue NoobValue::StringifyObject(std::string &text) const {
+  text.push_back('{');
+  for(auto it = (_value._object)->begin();
+    it != (_value._object)->end();
+    ++it) {
+    text.push_back('"');
+    text += it->first;
+    text.push_back('"');
+    text.push_back(':');
+    it->second->Stringify(text);
+    text.push_back(',');
+  }
+  if(text.back() == ',') {
+    text.pop_back();
+  }
+  text.push_back('}');
+  return kNoobOk;
+}
+
