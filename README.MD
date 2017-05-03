@@ -2,7 +2,7 @@
 
 ## Version
 
-v 1.1.0
+v 1.2.0
 
 ## Build status
 
@@ -37,7 +37,7 @@ The test files can be found in the `test` folder.
 
 ## Usage
 
-Below is a simple example on how to parse a JSON string into a document, and get the value of the nodes.
+Below is a simple example on how to parse a JSON string into a document, and get the value of the nodes. Finally it will stringify the document tree and return a string.
 
 ```c++
 #include "header/noob-value.h"
@@ -56,6 +56,10 @@ int main() {
   const NoobValue &s = v["stars"];
   std::cout << "Type: " << s.GetTypeString() << std::endl;
   std::cout << "Value: " << s.GetNumber() << std::endl;
+  
+  std::string str;
+  v.Stringify(str);
+  std::cout << "JSON Text: " << str << std::endl;
 
   return 0;
 }
