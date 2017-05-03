@@ -2,7 +2,7 @@
 
 ## Version
 
-v 1.0.0
+v 1.1.0
 
 ## Build status
 
@@ -50,12 +50,12 @@ int main() {
   v.Parse(json);
 
   const NoobValue &p = v["project"];
-  std::cout << "Type: " << p.type() << std::endl;
-  std::cout << "Value: " << p.string() << std::endl;
+  std::cout << "Type: " << p.GetTypeString() << std::endl;
+  std::cout << "Value: " << p.GetSring() << std::endl;
 
   const NoobValue &s = v["stars"];
-  std::cout << "Type: " << s.type() << std::endl;
-  std::cout << "Value: " << s.number() << std::endl;
+  std::cout << "Type: " << s.GetTypeString() << std::endl;
+  std::cout << "Value: " << s.GetNumber() << std::endl;
 
   return 0;
 }
