@@ -35,4 +35,31 @@ enum NoobReturnValue {
   kNoobMissCommaOrCurlyBracket
 };
 
+static const char *NoobTypeString[] = {
+  "Null",
+  "False",
+  "True",
+  "Number",
+  "String",
+  "Array",
+  "Object"
+};
+
+static const char *NoobStatusString[] = {
+  "Ok",
+  "ExpectValue",
+  "InvalidValue",
+  "NotSigular",
+  "NumberTooBig",
+  "MissQuotationMark",
+  "InvalidStringEscape",
+  "InvalidStringChar",
+  "InvalidUnicodeHex",
+  "InvalidUnicodeSurrogate",
+  "MissCommaOrSquareBracket",
+  "MissKey",
+  "MissColon",
+  "MissCommaOrCurlyBracket"
+};
+
 #endif //NOOB_JSON_PARSER_NOOB_CONSTANT_H
