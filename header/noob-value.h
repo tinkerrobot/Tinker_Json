@@ -54,6 +54,9 @@ class NoobValue {
     // Stringify json values
   NoobReturnValue Stringify(std::string &text) const;
 
+    // Prettify generated JSON string
+  NoobReturnValue Prettify(std::string &text, int indent = 0) const;
+
  private:
   void Free();
 
@@ -62,7 +65,7 @@ class NoobValue {
   NoobReturnValue ParseValue();
   NoobReturnValue ParseLiteral(const char *literal, NoobType type);
   NoobReturnValue ParseNumber();
-  NoobReturnValue ParseStringRaw(std::string *str);
+  NoobReturnValue ParseRawString(std::string *str);
   NoobReturnValue ParseString();
   NoobReturnValue ParseArray();
   NoobReturnValue ParseObject();
@@ -73,6 +76,10 @@ class NoobValue {
   NoobReturnValue StringifyString(std::string &text) const;
   NoobReturnValue StringifyArray(std::string &text) const;
   NoobReturnValue StringifyObject(std::string &text) const;
+
+  // JSON value stringifier
+  NoobReturnValue PrettifyArray(std::string &text, int indent) const;
+  NoobReturnValue PrettifyObject(std::string &text, int indent) const;
 
   // Data members
   NoobType _type;

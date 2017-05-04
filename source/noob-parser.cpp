@@ -161,7 +161,7 @@ NoobReturnValue NoobValue::ParseNumber() {
   return kNoobOk;
 }
 
-NoobReturnValue NoobValue::ParseStringRaw(std::string *str) {
+NoobReturnValue NoobValue::ParseRawString(std::string *str) {
   _json++;
   const char *pointer = _json;
   while(true) {
@@ -223,7 +223,7 @@ NoobReturnValue NoobValue::ParseString() {
   Free();
   NoobReturnValue result;
   _value._string = new std::string();
-  result = ParseStringRaw(_value._string);
+  result = ParseRawString(_value._string);
   if(result == kNoobOk) {
     _type = kNoobString;
   }
@@ -294,7 +294,7 @@ NoobReturnValue NoobValue::ParseObject() {
       delete element;
       break;
     }
-    result = ParseStringRaw(&key);
+    result = ParseRawString(&key);
     if(result != kNoobOk) {
       delete element;
       break;

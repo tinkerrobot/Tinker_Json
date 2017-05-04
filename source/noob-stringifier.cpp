@@ -26,7 +26,6 @@
  * and invisible to the outside.
  */
 NoobReturnValue NoobValue::Stringify(std::string &text) const {
-  std::string json;
   switch(_type) {
     case kNoobNull: {
       return StringifyLiteral("null", text);

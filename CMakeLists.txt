@@ -13,7 +13,9 @@ SET(SOURCE_FILES
   source/noob-value.cpp
   source/noob-accessor.cpp
   source/noob-parser.cpp
+  source/noob-stringifier.cpp
+  source/noob-prettifier.cpp
 
   test.cpp
-  source/noob-stringifier.cpp)
+  )
 ADD_EXECUTABLE(Noob_Json_Parser ${SOURCE_FILES})
