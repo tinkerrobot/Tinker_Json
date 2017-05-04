@@ -422,7 +422,6 @@ static double TestParseFile(const char *filename) {
     time_used = -1.0;
     printf("> Parsing %s failed!\n", filename);
   }
-  std::cout << str << std::endl;
 
   delete[] buffer;
   is.close();
@@ -430,7 +429,6 @@ static double TestParseFile(const char *filename) {
 }
 
 void FileTest() {
-  /*
   const char *files[] = {
     "data/twitter.json",
     "data/canada.json",
@@ -456,7 +454,6 @@ void FileTest() {
       printf(">>>>>>>>>>>>>>>>>>>>>>>>\n\n");
     }
   }
-   */
   TestParseFile("data/simple.json");
 }
 
