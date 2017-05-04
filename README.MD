@@ -2,7 +2,7 @@
 
 ## Version
 
-v 1.2.1
+v 1.3.0
 
 ## Build status
 
@@ -19,7 +19,7 @@ The Lept JSON is a simple JSON parser & generator introduced by [@Milo Yip](http
 
 The original version is programmed in C, I rewrote the whole program using C++ while reading the tutorial. After I finished the first version, I realized that it was imperfect, mixed C and C++ style and full of bugs.
 
-The **Noob JSON Parser** is the refactor of the first version, aiming to make it more concise and robust. The name "Noob" means that the coder, which is myself, is totally a rookie in coding, not the parser.
+The **Noob JSON Parser&Generator** is the refactor of the first version, aiming to make it more concise and robust. The name "Noob" means that the coder, which is myself, is totally a rookie in coding, not the code.
 
 Finally I want to express my thanks to [@Milo Yip](https://github.com/miloyip), who writes such a good tutorial from which I learn so much.
 
@@ -34,6 +34,8 @@ I use three json files which are also used in [NativeJson Benchmark](https://git
 **citm_catalog.json**: 10.8850 ms
 
 The test files can be found in the `test` folder.
+
+The speed of serialization is not yet tested.
 
 ## Usage
 
@@ -60,6 +62,11 @@ int main() {
   std::string str;
   v.Stringify(str);
   std::cout << "JSON Text: " << str << std::endl;
+  
+  std::string pre;
+  v.Prettify(pre);
+  std::cout << "Prettified JSON Text: " << std::endl;
+  std::cout << pre << std::endl;
 
   return 0;
 }
@@ -73,6 +80,11 @@ Value: NoobJson
 Type: Number
 Value: 1
 JSON Text: {"stars":1,"project":"NoobJson"}
+Prettified JSON Text: 
+{
+  "stars": 1,
+  "project": "NoobJson"
+}
 ```
 
 ## Coding Environment

@@ -413,10 +413,8 @@ static double TestParseFile(const char *filename) {
   NoobReturnValue result = v.Parse(buffer);
   std::string str;
   v.Stringify(str);
-  std::cout << str << std::endl;
   str.clear();
   v.Prettify(str);
-  std::cout << str << std::endl;
   end = clock();
   if(result == kNoobOk) {
     time_used = ((double)(end - start) / CLOCKS_PER_SEC) * 1000;
@@ -433,7 +431,6 @@ static double TestParseFile(const char *filename) {
 }
 
 void FileTest() {
-  /*
   const char *files[] = {
     "data/twitter.json",
     "data/canada.json",
@@ -459,7 +456,6 @@ void FileTest() {
       printf(">>>>>>>>>>>>>>>>>>>>>>>>\n\n");
     }
   }
-   */
   TestParseFile("data/menu.json");
 }
 
