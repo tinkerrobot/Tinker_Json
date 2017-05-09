@@ -1,5 +1,4 @@
-#include "header/noob-constant.h"
-#include "header/noob-value.h"
+#include <noob-json/noob-value.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -432,9 +431,9 @@ static double TestParseFile(const char *filename) {
 
 void FileTest() {
   const char *files[] = {
-    "data/twitter.json",
-    "data/canada.json",
-    "data/citm_catalog.json",
+    "test/twitter.json",
+    "test/canada.json",
+    "test/citm_catalog.json",
   };
 
   for(int j = 0; j < 3; ++j) {
@@ -456,7 +455,6 @@ void FileTest() {
       printf(">>>>>>>>>>>>>>>>>>>>>>>>\n\n");
     }
   }
-  TestParseFile("data/menu.json");
 }
 
 int main() {

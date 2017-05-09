@@ -2,7 +2,7 @@
 
 ## Version
 
-v 1.3.0
+v 2.1.0
 
 ## Build status
 
@@ -10,8 +10,8 @@ v 1.3.0
 | :-------------: | :-------------: |
 | ![linux-status] | ![macos-status] |
 
-[linux-status]: https://travis-ci.org/lilinsanity/Noob-Json-Parser.svg?branch=master "Travis build status"
-[macos-status]: https://travis-ci.org/lilinsanity/Noob-Json-Parser.svg?branch=master "Travis build status"
+[linux-status]: https://travis-ci.org/lilinsanity/Noob_Json.svg?branch=master "Travis build status"
+[macos-status]: https://travis-ci.org/lilinsanity/Noob_Json.svg?branch=master "Travis build status"
 
 ## Introduction
 
@@ -37,12 +37,38 @@ The test files can be found in the `test` folder.
 
 The speed of serialization is not yet tested.
 
+## Installation
+
+To compile the Noob JSON as dynamic library, you can make a `build` directory and enter it:
+
+```
+mkdir build
+cd build
+```
+
+Then you can use **cmake** and **make** tools to build and install it. If you don't have these tools, you should probably install them on your computer first:
+
+```
+cmake -DCMAKE_INSTALL_PREFIX=/usr/local ..
+make
+sudo make install
+```
+
+Notice that you can use the parameter `-DCMAKE_INSTALL_PREFIX` to specify the destination of the installation. The default location is `/usr/local`.
+
 ## Usage
+
+I provide a `test.cpp` to show compile and link the library to your project. To run the test, run the following commands:
+
+```
+g++ -std=c++11 test.cpp -o test-case -lNoobJson
+./test-case
+```
 
 Below is a simple example on how to parse a JSON string into a document, and get the value of the nodes. Finally it will stringify the document tree and return a string.
 
 ```c++
-#include "header/noob-value.h"
+#include <noob-json/noob-value.h>
 
 #include <iostream>
 

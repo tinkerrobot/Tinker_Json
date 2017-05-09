@@ -5,8 +5,8 @@
  * Date: 2017/5/4
  */
 
-#include "header/noob-constant.h"
-#include "header/noob-value.h"
+#include "source/noob-constant.h"
+#include "source/noob-value.h"
 
 #include <cerrno>
 #include <cmath>
@@ -15,7 +15,6 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <header/noob-value.h>
 
 /**
  * Tool functions

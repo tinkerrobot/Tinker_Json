@@ -8,7 +8,7 @@
 #ifndef NOOB_JSON_PARSER_NOOB_VALUE_H
 #define NOOB_JSON_PARSER_NOOB_VALUE_H
 
-#include "header/noob-constant.h"
+#include "noob-constant.h"
 
 #include <cstdio>
 #include <string>
