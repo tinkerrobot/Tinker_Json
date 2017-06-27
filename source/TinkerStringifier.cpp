@@ -1,12 +1,12 @@
 /*
- * Project: Noob_Json_Parser
- * File: noob-stringifier.cpp
+ * Project: Tinker_Json_Parser
+ * File: TinkerStringifier.cpp
  * Author: Ling.Li
  * Date: 2017/5/4
  */
 
-#include "source/noob-constant.h"
-#include "source/noob-value.h"
+#include "source/TinkerConstant.h"
+#include "source/TinkerValue.h"
 
 #include <cerrno>
 #include <cmath>
@@ -16,6 +16,8 @@
 #include <unordered_map>
 #include <vector>
 
+
+namespace Tinker {
 /**
  * Stringify function
  */
@@ -25,31 +27,31 @@
  * Any other stringifier functions are private
  * and invisible to the outside.
  */
-NoobReturnValue NoobValue::Stringify(std::string &text) const {
+ReturnValue Value::Stringify(std::string &text) const {
   switch(_type) {
-    case kNoobNull: {
+    case kNull: {
       return StringifyLiteral("null", text);
     }
-    case kNoobTrue: {
+    case kTrue: {
       return StringifyLiteral("true", text);
     }
-    case kNoobFalse: {
+    case kFalse: {
       return StringifyLiteral("false", text);
     }
-    case kNoobNumber: {
+    case kNumber: {
       return StringifyNumber(text);
     }
-    case kNoobString: {
+    case kString: {
       return StringifyString(text);
     }
-    case kNoobArray: {
+    case kArray: {
       return StringifyArray(text);
     }
-    case kNoobObject: {
+    case kObject: {
       return StringifyObject(text);
     }
     default: {
-      return kNoobInvalidValue;
+      return kInvalidValue;
     }
   }
 }
@@ -58,21 +60,21 @@ NoobReturnValue NoobValue::Stringify(std::string &text) const {
  * The functions below are private.
  */
 
-NoobReturnValue NoobValue::StringifyLiteral(
+ReturnValue Value::StringifyLiteral(
   const char *literal,
   std::string &text) const {
   text += literal;
-  return kNoobOk;
+  return kOk;
 }
 
-NoobReturnValue NoobValue::StringifyNumber(std::string &text) const {
+ReturnValue Value::StringifyNumber(std::string &text) const {
   char buffer[32];
   sprintf(buffer, "%.17g", _value._number);
   text += buffer;
-  return kNoobOk;
+  return kOk;
 }
 
-NoobReturnValue NoobValue::StringifyString(std::string &text) const {
+ReturnValue Value::StringifyString(std::string &text) const {
   static const char hex_digits[] = {
     '0', '1', '2', '3',
     '4', '5', '6', '7',
@@ -104,10 +106,10 @@ NoobReturnValue NoobValue::StringifyString(std::string &text) const {
     }
   }
   text.push_back('\"');
-  return kNoobOk;
+  return kOk;
 }
 
-NoobReturnValue NoobValue::StringifyArray(std::string &text) const {
+ReturnValue Value::StringifyArray(std::string &text) const {
   text.push_back('[');
   size_t size = (_value._array)->size();
   for(size_t i = 0; i < size; ++i) {
@@ -118,10 +120,10 @@ NoobReturnValue NoobValue::StringifyArray(std::string &text) const {
     text.pop_back();
   }
   text.push_back(']');
-  return kNoobOk;
+  return kOk;
 }
 
-NoobReturnValue NoobValue::StringifyObject(std::string &text) const {
+ReturnValue Value::StringifyObject(std::string &text) const {
   text.push_back('{');
   for(auto it = (_value._object)->begin();
     it != (_value._object)->end();
@@ -137,5 +139,6 @@ NoobReturnValue NoobValue::StringifyObject(std::string &text) const {
     text.pop_back();
   }
   text.push_back('}');
-  return kNoobOk;
+  return kOk;
+}
 }

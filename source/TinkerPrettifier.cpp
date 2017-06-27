@@ -1,12 +1,12 @@
 /*
- * Project: Noob_Json_Parser
- * File: noob-prettifier.cpp
+ * Project: Tinker_Json_Parser
+ * File: TinkerPrettifier.cpp
  * Author: Ling.Li
  * Date: 2017/5/4
  */
 
-#include "source/noob-constant.h"
-#include "source/noob-value.h"
+#include "source/TinkerConstant.h"
+#include "source/TinkerValue.h"
 
 #include <cerrno>
 #include <cmath>
@@ -16,11 +16,12 @@
 #include <unordered_map>
 #include <vector>
 
+namespace Tinker {
 /**
  * Tool functions
  */
 
-void NoobIndent(std::string &text, int indent) {
+void Indent(std::string &text, int indent) {
   for(int i = 0; i < indent; ++i) {
     text += "  ";
   }
@@ -33,33 +34,33 @@ void NoobIndent(std::string &text, int indent) {
  * Generally, when calling this function,
  * the argument indent should be 0.
  */
-NoobReturnValue NoobValue::Prettify(
+ReturnValue Value::Prettify(
   std::string &text, int indent)  const {
   std::string json;
   switch(_type) {
-    case kNoobNull: {
+    case kNull: {
       return StringifyLiteral("null", text);
     }
-    case kNoobTrue: {
+    case kTrue: {
       return StringifyLiteral("true", text);
     }
-    case kNoobFalse: {
+    case kFalse: {
       return StringifyLiteral("false", text);
     }
-    case kNoobNumber: {
+    case kNumber: {
       return StringifyNumber(text);
     }
-    case kNoobString: {
+    case kString: {
       return StringifyString(text);
     }
-    case kNoobArray: {
+    case kArray: {
       return PrettifyArray(text, indent);
     }
-    case kNoobObject: {
+    case kObject: {
       return PrettifyObject(text, indent);
     }
     default: {
-      return kNoobInvalidValue;
+      return kInvalidValue;
     }
   }
 }
@@ -68,33 +69,33 @@ NoobReturnValue NoobValue::Prettify(
  * The functions below are private.
  */
 
-NoobReturnValue NoobValue::PrettifyArray(std::string &text, int indent) const {
+ReturnValue Value::PrettifyArray(std::string &text, int indent) const {
   text.push_back('[');
   if((_value._array)->size() > 0) {
     text.push_back('\n');
     size_t size = (_value._array)->size();
     for(size_t i = 0; i < size; ++i) {
-      NoobIndent(text, indent + 1);
+      Indent(text, indent + 1);
       (_value._array)->at(i)->Prettify(text, indent + 1);
       text += ",\n";
     }
     text.pop_back();
     text.pop_back();
     text.push_back('\n');
-    NoobIndent(text, indent);
+    Indent(text, indent);
   }
   text.push_back(']');
-  return kNoobOk;
+  return kOk;
 }
 
-NoobReturnValue NoobValue::PrettifyObject(std::string &text, int indent) const {
+ReturnValue Value::PrettifyObject(std::string &text, int indent) const {
   text.push_back('{');
   if((_value._object)->size() > 0) {
     text.push_back('\n');
     for(auto it = (_value._object)->begin();
       it != (_value._object)->end();
       ++it) {
-      NoobIndent(text, indent + 1);
+      Indent(text, indent + 1);
       text.push_back('"');
       text += it->first;
       text.push_back('"');
@@ -105,8 +106,9 @@ NoobReturnValue NoobValue::PrettifyObject(std::string &text, int indent) const {
     text.pop_back();
     text.pop_back();
     text.push_back('\n');
-    NoobIndent(text, indent);
+    Indent(text, indent);
   }
   text.push_back('}');
-  return kNoobOk;
+  return kOk;
+}
 }

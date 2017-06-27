@@ -1,12 +1,12 @@
 /*
- * Project: Noob_Json_Parser
- * File: noob-parser.cpp
+ * Project: Tinker_Json_Parser
+ * File: TinkerParser.cpp
  * Author: Ling.Li
  * Date: 2017/5/4
  */
 
-#include "source/noob-constant.h"
-#include "source/noob-value.h"
+#include "source/TinkerConstant.h"
+#include "source/TinkerValue.h"
 
 #include <cerrno>
 #include <cmath>
@@ -16,6 +16,8 @@
 #include <unordered_map>
 #include <vector>
 
+
+namespace Tinker {
 /**
  * Tool functions
  */
@@ -28,14 +30,14 @@ inline bool IsDigit1To9(char ch) {
   return (ch >= '1' && ch <= '9');
 }
 
-NoobReturnValue NoobDeleteString(
+ReturnValue DeleteString(
   std::string *str,
-  NoobReturnValue result) {
+  ReturnValue result) {
   delete str;
   return result;
 }
 
-inline const char* NoobParseHex4(const char *pointer, unsigned *u) {
+inline const char* ParseHex4(const char *pointer, unsigned *u) {
   *u = 0;
   for (int i = 0; i < 4; ++i) {
     char ch = *pointer++;
@@ -48,7 +50,7 @@ inline const char* NoobParseHex4(const char *pointer, unsigned *u) {
   return pointer;
 }
 
-inline void NoobEncodeUtf8(std::string *str, unsigned u) {
+inline void EncodeUtf8(std::string *str, unsigned u) {
   if (u <= 0x7F) {
     str->push_back(u & 0xFF);
   } else if (u <= 0x7FF) {
@@ -74,18 +76,18 @@ inline void NoobEncodeUtf8(std::string *str, unsigned u) {
  * Note that this is the only API exposed to the users.
  * Any other parser functions are private and invisible to the outside.
  */
-NoobReturnValue NoobValue::Parse(const char *json) {
+ReturnValue Value::Parse(const char *json) {
   Free();
   _json = json;
-  _type = kNoobNull;
-  NoobReturnValue result;
+  _type = kNull;
+  ReturnValue result;
   ParseWhitespace();
   result = ParseValue();
-  if(result == kNoobOk) {
+  if(result == kOk) {
     ParseWhitespace();
     if(*_json != '\0') {
-      _type = kNoobNull;
-      return kNoobNotSigular;
+      _type = kNull;
+      return kNotSingular;
     }
   }
   return result;
@@ -95,7 +97,7 @@ NoobReturnValue NoobValue::Parse(const char *json) {
  * The functions below are private.
  */
 
-void NoobValue::ParseWhitespace() {
+void Value::ParseWhitespace() {
   const char *pointer = _json;
   while(*pointer == ' ' || *pointer == '\t' ||
     *pointer == '\n' || *pointer == '\r') {
@@ -104,48 +106,48 @@ void NoobValue::ParseWhitespace() {
   _json = pointer;
 }
 
-NoobReturnValue NoobValue::ParseValue() {
+ReturnValue Value::ParseValue() {
   switch(*_json) {
-    case 'n': return ParseLiteral("null", kNoobNull);
-    case 't': return ParseLiteral("true", kNoobTrue);
-    case 'f': return ParseLiteral("false", kNoobFalse);
+    case 'n': return ParseLiteral("null", kNull);
+    case 't': return ParseLiteral("true", kTrue);
+    case 'f': return ParseLiteral("false", kFalse);
     case '"': return ParseString();
     case '[': return ParseArray();
     case '{': return ParseObject();
-    case '\0': return kNoobExpectValue;
+    case '\0': return kExpectValue;
     default: return ParseNumber();
   }
 }
 
-NoobReturnValue NoobValue::ParseLiteral(const char *literal, NoobType type) {
+ReturnValue Value::ParseLiteral(const char *literal, Type type) {
   _json++;
   const char *pointer = _json;
   for (size_t i = 0; literal[i + 1]; ++i)
     if (*(pointer++) != literal[i + 1])
-      return kNoobInvalidValue;
+      return kInvalidValue;
   _json = pointer;
   _type = type;
-  return kNoobOk;
+  return kOk;
 }
 
-NoobReturnValue NoobValue::ParseNumber() {
+ReturnValue Value::ParseNumber() {
   const char *pointer = _json;
   if(*pointer == '-') pointer++;
   if(*pointer == '0') {
     pointer++;
   } else {
-    if(!IsDigit1To9(*pointer)) return kNoobInvalidValue;
+    if(!IsDigit1To9(*pointer)) return kInvalidValue;
     do pointer++; while(IsDigit(*pointer));
   }
   if(*pointer == '.') {
     pointer++;
-    if(!IsDigit(*pointer)) return kNoobInvalidValue;
+    if(!IsDigit(*pointer)) return kInvalidValue;
     do pointer++; while(IsDigit(*pointer));
   }
   if(*pointer == 'e' || *pointer == 'E') {
     pointer++;
     if(*pointer == '+' || *pointer == '-') pointer++;
-    if(!IsDigit(*pointer)) return kNoobInvalidValue;
+    if(!IsDigit(*pointer)) return kInvalidValue;
     do pointer++; while(IsDigit(*pointer));
   }
 
@@ -154,14 +156,14 @@ NoobReturnValue NoobValue::ParseNumber() {
   if(errno == ERANGE &&
     (_value._number == HUGE_VAL ||
       _value._number == -HUGE_VAL)) {
-    return kNoobNumberTooBig;
+    return kNumberTooBig;
   }
-  _type = kNoobNumber;
+  _type = kNumber;
   _json = pointer;
-  return kNoobOk;
+  return kOk;
 }
 
-NoobReturnValue NoobValue::ParseRawString(std::string *str) {
+ReturnValue Value::ParseRawString(std::string *str) {
   _json++;
   const char *pointer = _json;
   while(true) {
@@ -169,10 +171,10 @@ NoobReturnValue NoobValue::ParseRawString(std::string *str) {
     switch(ch) {
       case '\"': {
         _json = pointer;
-        return kNoobOk;
+        return kOk;
       }
       case '\0': {
-        return NoobDeleteString(str, kNoobMissQuotationMark);
+        return DeleteString(str, kMissQuotationMark);
       }
       case '\\': {
         switch(*pointer++) {
@@ -186,66 +188,66 @@ NoobReturnValue NoobValue::ParseRawString(std::string *str) {
           case 't':  str->push_back('\t'); break;
           case 'u': {
             unsigned u1, u2;
-            pointer = NoobParseHex4(pointer, &u1);
+            pointer = ParseHex4(pointer, &u1);
             if(pointer == nullptr)
-              return NoobDeleteString(str, kNoobInvalidUnicodeHex);
+              return DeleteString(str, kInvalidUnicodeHex);
             if(u1 >= 0xD800 && u1 <= 0xDBFF) {
               if(*pointer++ != '\\')
-                return NoobDeleteString(str, kNoobInvalidUnicodeSurrogate);
+                return DeleteString(str, kInvalidUnicodeSurrogate);
               if(*pointer++ != 'u')
-                return NoobDeleteString(str, kNoobInvalidUnicodeSurrogate);
-              pointer = NoobParseHex4(pointer, &u2);
+                return DeleteString(str, kInvalidUnicodeSurrogate);
+              pointer = ParseHex4(pointer, &u2);
               if(pointer == nullptr)
-                return NoobDeleteString(str, kNoobInvalidUnicodeHex);
+                return DeleteString(str, kInvalidUnicodeHex);
               if(u2 < 0xDC00 || u2 > 0xDFFF)
-                return NoobDeleteString(str, kNoobInvalidUnicodeSurrogate);
+                return DeleteString(str, kInvalidUnicodeSurrogate);
               u1 = (((u1 - 0xD800) << 10) | (u2 - 0xDC00)) + 0x10000;
             }
-            NoobEncodeUtf8(str, u1);
+            EncodeUtf8(str, u1);
             break;
           }
           default: {
-            return NoobDeleteString(str, kNoobInvalidStringEscape);
+            return DeleteString(str, kInvalidStringEscape);
           }
         }
         break;
       }
       default: {
         if((unsigned char)ch < 0x20)
-          return NoobDeleteString(str, kNoobInvalidStringChar);
+          return DeleteString(str, kInvalidStringChar);
         str->push_back(ch);
       }
     }
   }
 }
 
-NoobReturnValue NoobValue::ParseString() {
+ReturnValue Value::ParseString() {
   Free();
-  NoobReturnValue result;
+  ReturnValue result;
   _value._string = new std::string();
   result = ParseRawString(_value._string);
-  if(result == kNoobOk) {
-    _type = kNoobString;
+  if(result == kOk) {
+    _type = kString;
   }
   return result;
 }
 
-NoobReturnValue NoobValue::ParseArray() {
+ReturnValue Value::ParseArray() {
   _json++;
-  NoobReturnValue result;
+  ReturnValue result;
   Free();
-  _value._array = new std::vector<NoobValue *>();
+  _value._array = new std::vector<Value *>();
   ParseWhitespace();
   if(*_json == ']') {
     _json++;
-    _type = kNoobArray;
-    return kNoobOk;
+    _type = kArray;
+    return kOk;
   }
   while(true) {
-    NoobValue *element = new NoobValue();
+    Value *element = new Value();
     element->_json = _json;
     result = element->ParseValue();
-    if(result != kNoobOk) {
+    if(result != kOk) {
       delete element;
       break;
     } else {
@@ -257,10 +259,10 @@ NoobReturnValue NoobValue::ParseArray() {
         ParseWhitespace();
       } else if(*_json == ']') {
         _json++;
-        _type = kNoobArray;
-        return kNoobOk;
+        _type = kArray;
+        return kOk;
       } else {
-        result = kNoobMissCommaOrSquareBracket;
+        result = kMissCommaOrSquareBracket;
         break;
       }
     }
@@ -274,34 +276,34 @@ NoobReturnValue NoobValue::ParseArray() {
   return result;
 }
 
-NoobReturnValue NoobValue::ParseObject() {
+ReturnValue Value::ParseObject() {
   _json++;
-  NoobReturnValue result;
+  ReturnValue result;
   Free();
-  _value._object = new std::unordered_map<std::string, NoobValue *>();
+  _value._object = new std::unordered_map<std::string, Value *>();
   ParseWhitespace();
   if(*_json == '}') {
     _json++;
-    _type = kNoobObject;
-    return kNoobOk;
+    _type = kObject;
+    return kOk;
   }
   while(true) {
-    NoobValue *element = new NoobValue();
+    Value *element = new Value();
     std::string key = "";
 
     if(*_json != '"') {
-      result = kNoobMissKey;
+      result = kMissKey;
       delete element;
       break;
     }
     result = ParseRawString(&key);
-    if(result != kNoobOk) {
+    if(result != kOk) {
       delete element;
       break;
     }
     ParseWhitespace();
     if(*_json != ':') {
-      result = kNoobMissColon;
+      result = kMissColon;
       delete element;
       break;
     }
@@ -309,7 +311,7 @@ NoobReturnValue NoobValue::ParseObject() {
     ParseWhitespace();
     element->_json = _json;
     result = element->ParseValue();
-    if(result != kNoobOk) {
+    if(result != kOk) {
       delete element;
       break;
     }
@@ -321,10 +323,10 @@ NoobReturnValue NoobValue::ParseObject() {
       ParseWhitespace();
     } else if(*_json == '}') {
       _json++;
-      _type = kNoobObject;
-      return kNoobOk;
+      _type = kObject;
+      return kOk;
     } else {
-      result = kNoobMissCommaOrCurlyBracket;
+      result = kMissCommaOrCurlyBracket;
       break;
     }
   }
@@ -336,4 +338,5 @@ NoobReturnValue NoobValue::ParseObject() {
   delete _value._object;
   _value._object = nullptr;
   return result;
+}
 }

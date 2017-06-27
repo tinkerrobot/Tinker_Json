@@ -1,18 +1,18 @@
 SET(SOURCE_FILES
-  noob-constant.h
-  noob-value.h
+  TinkerConstant.h
+  TinkerValue.h
 
-  noob-value.cpp
-  noob-accessor.cpp
-  noob-parser.cpp
-  noob-stringifier.cpp
-  noob-prettifier.cpp
+  TinkerValue.cpp
+  TinkerAccessor.cpp
+  TinkerParser.cpp
+  TinkerStringifier.cpp
+  TinkerPrettifier.cpp
   )
 
 set(LIBRARY_OUTPUT_PATH output)
 
-add_library(NoobJson SHARED ${SOURCE_FILES})
-set_target_properties(NoobJson PROPERTIES VERSION 2.1 SOVERSION 2)
+add_library(TinkerJson SHARED ${SOURCE_FILES})
+set_target_properties(TinkerJson PROPERTIES VERSION 3.0 SOVERSION 3)
 
-install(TARGETS NoobJson LIBRARY DESTINATION lib)
-install(FILES noob-constant.h noob-value.h DESTINATION include/noob-json)
+install(TARGETS TinkerJson LIBRARY DESTINATION lib)
+install(FILES TinkerConstant.h TinkerValue.h DESTINATION include/tinker-json)

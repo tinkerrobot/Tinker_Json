@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(Noob_Json_Parser)
+project(Tinker_Json_Parser)
 
 set(CMAKE_CXX_STANDARD 11)
 
 include_directories(${PROJECT_SOURCE_DIR})
 
-add_subdirectory(source lib)
+add_subdirectory(source)

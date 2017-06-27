@@ -1,4 +1,4 @@
-#include <noob-json/noob-value.h>
+#include <tinker-json/TinkerValue.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -9,6 +9,8 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+using namespace Tinker;
 
 /*
  * Global Variables, store the results of the tests.
@@ -52,33 +54,33 @@ int gTestPass = 0;
 
 #define TestNumber(expect, json)\
   do {\
-    NoobValue v;\
-    TestEqualInt(kNoobOk, v.Parse(json));\
-    TestEqualInt(kNoobNumber, v.GetType());\
+    Value v;\
+    TestEqualInt(kOk, v.Parse(json));\
+    TestEqualInt(kNumber, v.GetType());\
     TestEqualDouble(expect, v.GetNumber());\
   } while(0)
 
 #define TestError(error, json)\
   do {\
-    NoobValue v;\
+    Value v;\
     TestEqualInt(error, v.Parse(json));\
-    TestEqualInt(kNoobNull, v.GetType());\
+    TestEqualInt(kNull, v.GetType());\
   } while(0)
 
 #define TestString(expect, json)\
   do {\
-    NoobValue v;\
-    TestEqualInt(kNoobOk, v.Parse(json));\
-    TestEqualInt(kNoobString, v.GetType());\
+    Value v;\
+    TestEqualInt(kOk, v.Parse(json));\
+    TestEqualInt(kString, v.GetType());\
     TestEqualString(expect, v.GetString().c_str(), v.GetLength());\
   } while(0)
 
 #define TestRoundtrip(json)\
     do {\
-        NoobValue v;\
+        Value v;\
         std::string json2;\
-        TestEqualInt(kNoobOk, v.Parse(json));\
-        TestEqualInt(kNoobOk, v.Stringify(json2));\
+        TestEqualInt(kOk, v.Parse(json));\
+        TestEqualInt(kOk, v.Stringify(json2));\
         TestEqualString(json, json2.c_str(), json2.length());\
     } while(0)
 
@@ -90,13 +92,13 @@ int gTestPass = 0;
  */
 
 static void TestParseLiteral() {
-  NoobValue v;
-  TestEqualInt(kNoobOk, v.Parse("null"));
-  TestEqualInt(kNoobNull, v.GetType());
-  TestEqualInt(kNoobOk, v.Parse("true"));
-  TestEqualInt(kNoobTrue, v.GetType());
-  TestEqualInt(kNoobOk, v.Parse("false"));
-  TestEqualInt(kNoobFalse, v.GetType());
+  Value v;
+  TestEqualInt(kOk, v.Parse("null"));
+  TestEqualInt(kNull, v.GetType());
+  TestEqualInt(kOk, v.Parse("true"));
+  TestEqualInt(kTrue, v.GetType());
+  TestEqualInt(kOk, v.Parse("false"));
+  TestEqualInt(kFalse, v.GetType());
 }
 
 static void TestParseNumber() {
@@ -145,47 +147,47 @@ static void TestParseString() {
 }
 
 static void TestParseArray() {
-  NoobValue v;
-  TestEqualInt(kNoobOk, v.Parse("[ ]"));
-  TestEqualInt(kNoobArray, v.GetType());
+  Value v;
+  TestEqualInt(kOk, v.Parse("[ ]"));
+  TestEqualInt(kArray, v.GetType());
   TestEqualInt(0, v.GetArraySize());
 
-  TestEqualInt(kNoobOk, v.Parse("[ null , false , true , 123 , \"abc\" ]"));
-  TestEqualInt(kNoobArray, v.GetType());
+  TestEqualInt(kOk, v.Parse("[ null , false , true , 123 , \"abc\" ]"));
+  TestEqualInt(kArray, v.GetType());
   TestEqualInt(5, v.GetArraySize());
-  TestEqualInt(kNoobNull, v[0].GetType());
-  TestEqualInt(kNoobFalse, v[1].GetType());
-  TestEqualInt(kNoobTrue, v[2].GetType());
-  TestEqualInt(kNoobNumber, v[3].GetType());
-  TestEqualInt(kNoobString, v[4].GetType());
+  TestEqualInt(kNull, v[0].GetType());
+  TestEqualInt(kFalse, v[1].GetType());
+  TestEqualInt(kTrue, v[2].GetType());
+  TestEqualInt(kNumber, v[3].GetType());
+  TestEqualInt(kString, v[4].GetType());
   TestEqualDouble(123.0, v[3].GetNumber());
   TestEqualString("abc",
     v[4].GetString().c_str(),
     v[4].GetLength());
 
-  TestEqualInt(kNoobOk, v.Parse("[ [ ] , [ 0 ] , [ 0 , 1 ] , [ 0 , 1 , 2 ] ]"));
-  TestEqualInt(kNoobArray, v.GetType());
+  TestEqualInt(kOk, v.Parse("[ [ ] , [ 0 ] , [ 0 , 1 ] , [ 0 , 1 , 2 ] ]"));
+  TestEqualInt(kArray, v.GetType());
   TestEqualInt(4, v.GetArraySize());
   for (int i = 0; i < 4; i++) {
-    const NoobValue &a = v[i];
-    TestEqualInt(kNoobArray, a.GetType());
+    const Value &a = v[i];
+    TestEqualInt(kArray, a.GetType());
     TestEqualInt(i, a.GetArraySize());
     for (int j = 0; j < i; j++) {
-      const NoobValue &e = a[j];
-      TestEqualInt(kNoobNumber, e.GetType());
+      const Value &e = a[j];
+      TestEqualInt(kNumber, e.GetType());
       TestEqualDouble((double)j, e.GetNumber());
     }
   }
 }
 
 static void TestParseObject() {
-  NoobValue v;
+  Value v;
 
-  TestEqualInt(kNoobOk, v.Parse(" { } "));
-  TestEqualInt(kNoobObject, v.GetType());
+  TestEqualInt(kOk, v.Parse(" { } "));
+  TestEqualInt(kObject, v.GetType());
   TestEqualInt(0, v.GetObjectSize());
 
-  TestEqualInt(kNoobOk, v.Parse(
+  TestEqualInt(kOk, v.Parse(
     " { "
       "\"n\" : null , "
       "\"f\" : false , "
@@ -196,129 +198,129 @@ static void TestParseObject() {
       "\"o\" : { \"1\" : 1, \"2\" : 2, \"3\" : 3 }"
       " } "
   ));
-  TestEqualInt(kNoobObject, v.GetType());
+  TestEqualInt(kObject, v.GetType());
   TestEqualInt(7, v.GetObjectSize());
   TestTrue(v.HasKey("n"));
-  TestEqualInt(kNoobNull, v.GetValue("n").GetType());
+  TestEqualInt(kNull, v.GetValue("n").GetType());
   TestTrue(v.HasKey("f"));
-  TestEqualInt(kNoobFalse, v.GetValue("f").GetType());
+  TestEqualInt(kFalse, v.GetValue("f").GetType());
   TestTrue(v.HasKey("t"));
-  TestEqualInt(kNoobTrue, v.GetValue("t").GetType());
+  TestEqualInt(kTrue, v.GetValue("t").GetType());
   TestTrue(v.HasKey("i"));
-  TestEqualInt(kNoobNumber, v.GetValue("i").GetType());
+  TestEqualInt(kNumber, v.GetValue("i").GetType());
   TestEqualDouble(123.0, v.GetValue("i").GetNumber());
   TestTrue(v.HasKey("s"));
-  TestEqualInt(kNoobString, v.GetValue("s").GetType());
+  TestEqualInt(kString, v.GetValue("s").GetType());
   TestEqualString("abc",
     v.GetValue("s").GetString().c_str(),
     v.GetValue("s").GetString().length()
   );
   TestTrue(v.HasKey("a"));
-  TestEqualInt(kNoobArray, v.GetValue("a").GetType());
+  TestEqualInt(kArray, v.GetValue("a").GetType());
   TestEqualInt(3, v.GetValue("a").GetArraySize());
   for (size_t i = 0; i < 3; i++) {
-    const NoobValue& e = v.GetValue("a").GetElement(i);
-    TestEqualInt(kNoobNumber, e.GetType());
+    const Value& e = v.GetValue("a").GetElement(i);
+    TestEqualInt(kNumber, e.GetType());
     TestEqualDouble(i + 1.0, e.GetNumber());
   }
   TestTrue(v.HasKey("o"));
   {
-    const NoobValue &o = v.GetValue("o");
-    TestEqualInt(kNoobObject, o.GetType());
+    const Value &o = v.GetValue("o");
+    TestEqualInt(kObject, o.GetType());
     std::string key[] = {"1", "2", "3"};
     for (size_t i = 0; i < 3; i++) {
-      const NoobValue &ov = o.GetValue(key[i]);
-      TestEqualInt(kNoobNumber, ov.GetType());
+      const Value &ov = o.GetValue(key[i]);
+      TestEqualInt(kNumber, ov.GetType());
       TestEqualDouble(i + 1.0, ov.GetNumber());
     }
   }
 }
 
 static void TestParseIllegalLiteral() {
-  TestError(kNoobExpectValue, "");
-  TestError(kNoobExpectValue, " ");
+  TestError(kExpectValue, "");
+  TestError(kExpectValue, " ");
 
-  TestError(kNoobInvalidValue, "nul");
-  TestError(kNoobInvalidValue, "?");
+  TestError(kInvalidValue, "nul");
+  TestError(kInvalidValue, "?");
 
-  TestError(kNoobNotSigular, "null x");
+  TestError(kNotSingular, "null x");
 }
 
 static void TestParseIllegalNumber() {
-  TestError(kNoobInvalidValue, "+0");
-  TestError(kNoobInvalidValue, "+1");
-  TestError(kNoobInvalidValue, ".123"); /* at least one digit before '.' */
-  TestError(kNoobInvalidValue, "1.");   /* at least one digit after '.' */
-  TestError(kNoobInvalidValue, "INF");
-  TestError(kNoobInvalidValue, "inf");
-  TestError(kNoobInvalidValue, "NAN");
-  TestError(kNoobInvalidValue, "nan");
+  TestError(kInvalidValue, "+0");
+  TestError(kInvalidValue, "+1");
+  TestError(kInvalidValue, ".123"); /* at least one digit before '.' */
+  TestError(kInvalidValue, "1.");   /* at least one digit after '.' */
+  TestError(kInvalidValue, "INF");
+  TestError(kInvalidValue, "inf");
+  TestError(kInvalidValue, "NAN");
+  TestError(kInvalidValue, "nan");
 
-  TestError(kNoobNumberTooBig, "1e309");
-  TestError(kNoobNumberTooBig, "-1e309");
-  TestError(kNoobNotSigular, "0123"); /* after zero should be '.' or nothing */
-  TestError(kNoobNotSigular, "0x0");
-  TestError(kNoobNotSigular, "0x123");
+  TestError(kNumberTooBig, "1e309");
+  TestError(kNumberTooBig, "-1e309");
+  TestError(kNotSingular, "0123"); /* after zero should be '.' or nothing */
+  TestError(kNotSingular, "0x0");
+  TestError(kNotSingular, "0x123");
 }
 
 static void TestParseIllegalString() {
-  TestError(kNoobMissQuotationMark, "\"");
-  TestError(kNoobMissQuotationMark, "\"abc");
-  TestError(kNoobInvalidStringEscape, "\"\\v\"");
-  TestError(kNoobInvalidStringEscape, "\"\\'\"");
-  TestError(kNoobInvalidStringEscape, "\"\\0\"");
-  TestError(kNoobInvalidStringEscape, "\"\\x12\"");
-  TestError(kNoobInvalidStringChar, "\"\x01\"");
-  TestError(kNoobInvalidStringChar, "\"\x1F\"");
+  TestError(kMissQuotationMark, "\"");
+  TestError(kMissQuotationMark, "\"abc");
+  TestError(kInvalidStringEscape, "\"\\v\"");
+  TestError(kInvalidStringEscape, "\"\\'\"");
+  TestError(kInvalidStringEscape, "\"\\0\"");
+  TestError(kInvalidStringEscape, "\"\\x12\"");
+  TestError(kInvalidStringChar, "\"\x01\"");
+  TestError(kInvalidStringChar, "\"\x1F\"");
 }
 
 static void TestParseIllegalUnicode() {
-  TestError(kNoobInvalidUnicodeHex, "\"\\u\"");
-  TestError(kNoobInvalidUnicodeHex, "\"\\u0\"");
-  TestError(kNoobInvalidUnicodeHex, "\"\\u01\"");
-  TestError(kNoobInvalidUnicodeHex, "\"\\u012\"");
-  TestError(kNoobInvalidUnicodeHex, "\"\\u/000\"");
-  TestError(kNoobInvalidUnicodeHex, "\"\\uG000\"");
-  TestError(kNoobInvalidUnicodeHex, "\"\\u0/00\"");
-  TestError(kNoobInvalidUnicodeHex, "\"\\u0G00\"");
-  TestError(kNoobInvalidUnicodeHex, "\"\\u0/00\"");
-  TestError(kNoobInvalidUnicodeHex, "\"\\u00G0\"");
-  TestError(kNoobInvalidUnicodeHex, "\"\\u000/\"");
-  TestError(kNoobInvalidUnicodeHex, "\"\\u000G\"");
-  TestError(kNoobInvalidUnicodeHex, "\"\\u 123\"");
+  TestError(kInvalidUnicodeHex, "\"\\u\"");
+  TestError(kInvalidUnicodeHex, "\"\\u0\"");
+  TestError(kInvalidUnicodeHex, "\"\\u01\"");
+  TestError(kInvalidUnicodeHex, "\"\\u012\"");
+  TestError(kInvalidUnicodeHex, "\"\\u/000\"");
+  TestError(kInvalidUnicodeHex, "\"\\uG000\"");
+  TestError(kInvalidUnicodeHex, "\"\\u0/00\"");
+  TestError(kInvalidUnicodeHex, "\"\\u0G00\"");
+  TestError(kInvalidUnicodeHex, "\"\\u0/00\"");
+  TestError(kInvalidUnicodeHex, "\"\\u00G0\"");
+  TestError(kInvalidUnicodeHex, "\"\\u000/\"");
+  TestError(kInvalidUnicodeHex, "\"\\u000G\"");
+  TestError(kInvalidUnicodeHex, "\"\\u 123\"");
 
-  TestError(kNoobInvalidUnicodeSurrogate, "\"\\uD800\"");
-  TestError(kNoobInvalidUnicodeSurrogate, "\"\\uDBFF\"");
-  TestError(kNoobInvalidUnicodeSurrogate, "\"\\uD800\\\\\"");
-  TestError(kNoobInvalidUnicodeSurrogate, "\"\\uD800\\uDBFF\"");
-  TestError(kNoobInvalidUnicodeSurrogate, "\"\\uD800\\uE000\"");
+  TestError(kInvalidUnicodeSurrogate, "\"\\uD800\"");
+  TestError(kInvalidUnicodeSurrogate, "\"\\uDBFF\"");
+  TestError(kInvalidUnicodeSurrogate, "\"\\uD800\\\\\"");
+  TestError(kInvalidUnicodeSurrogate, "\"\\uD800\\uDBFF\"");
+  TestError(kInvalidUnicodeSurrogate, "\"\\uD800\\uE000\"");
 }
 
 static void TestParseIllegalArray() {
-  TestError(kNoobMissCommaOrSquareBracket, "[1");
-  TestError(kNoobMissCommaOrSquareBracket, "[1}");
-  TestError(kNoobMissCommaOrSquareBracket, "[1 2");
-  TestError(kNoobMissCommaOrSquareBracket, "[[]");
+  TestError(kMissCommaOrSquareBracket, "[1");
+  TestError(kMissCommaOrSquareBracket, "[1}");
+  TestError(kMissCommaOrSquareBracket, "[1 2");
+  TestError(kMissCommaOrSquareBracket, "[[]");
 }
 
 static void TestParseIllegalObject() {
 
-  TestError(kNoobMissKey, "{:1,");
-  TestError(kNoobMissKey, "{1:1,");
-  TestError(kNoobMissKey, "{true:1,");
-  TestError(kNoobMissKey, "{false:1,");
-  TestError(kNoobMissKey, "{null:1,");
-  TestError(kNoobMissKey, "{[]:1,");
-  TestError(kNoobMissKey, "{{}:1,");
-  TestError(kNoobMissKey, "{\"a\":1,");
+  TestError(kMissKey, "{:1,");
+  TestError(kMissKey, "{1:1,");
+  TestError(kMissKey, "{true:1,");
+  TestError(kMissKey, "{false:1,");
+  TestError(kMissKey, "{null:1,");
+  TestError(kMissKey, "{[]:1,");
+  TestError(kMissKey, "{{}:1,");
+  TestError(kMissKey, "{\"a\":1,");
 
-  TestError(kNoobMissColon, "{\"a\"}");
-  TestError(kNoobMissColon, "{\"a\",\"b\"}");
+  TestError(kMissColon, "{\"a\"}");
+  TestError(kMissColon, "{\"a\",\"b\"}");
 
-  TestError(kNoobMissCommaOrCurlyBracket, "{\"a\":1");
-  TestError(kNoobMissCommaOrCurlyBracket, "{\"a\":1]");
-  TestError(kNoobMissCommaOrCurlyBracket, "{\"a\":1 \"b\"");
-  TestError(kNoobMissCommaOrCurlyBracket, "{\"a\":{}");
+  TestError(kMissCommaOrCurlyBracket, "{\"a\":1");
+  TestError(kMissCommaOrCurlyBracket, "{\"a\":1]");
+  TestError(kMissCommaOrCurlyBracket, "{\"a\":1 \"b\"");
+  TestError(kMissCommaOrCurlyBracket, "{\"a\":{}");
 }
 
 static void TestStringifyLiteral() {
@@ -370,7 +372,7 @@ static void TestStringifyObject() {
    * Note that the generator cannot pass this test
    * Because the orders of the object's members are not the same
    * Between the original JSON text and the generated JSON text.
-   * However, the NoobValue trees of the two JSON texts are identical.
+   * However, the Value trees of the two JSON texts are identical.
    */
   // TestRoundtrip("{\"n\":null,\"f\":false,\"t\":true,\"i\":123,\"s\":\"abc\",\"a\":[1,2,3],\"o\":{\"1\":1,\"2\":2,\"3\":3}}");
 }
@@ -405,17 +407,17 @@ static double TestParseFile(const char *filename) {
   is.read(buffer, length);
   buffer[length] = '\0';
 
-  NoobValue v;
+  Value v;
   double time_used = 0.0;
   clock_t start, end;
   start = clock();
-  NoobReturnValue result = v.Parse(buffer);
+  ReturnValue result = v.Parse(buffer);
   std::string str;
   v.Stringify(str);
   str.clear();
   v.Prettify(str);
   end = clock();
-  if(result == kNoobOk) {
+  if(result == kOk) {
     time_used = ((double)(end - start) / CLOCKS_PER_SEC) * 1000;
     printf("> Parsing %s successful!\n", filename);
     printf("> Time Used: %.4f ms.\n", time_used);

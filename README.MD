@@ -1,8 +1,8 @@
-# Noob JSON Parser - C++ Version of Lept JSON Parser
+# Tinker JSON Parser - C++ Version of Lept JSON Parser
 
 ## Version
 
-v 2.1.0
+v 3.0.0
 
 ## Build status
 
@@ -19,7 +19,7 @@ The Lept JSON is a simple JSON parser & generator introduced by [@Milo Yip](http
 
 The original version is programmed in C, I rewrote the whole program using C++ while reading the tutorial. After I finished the first version, I realized that it was imperfect, mixed C and C++ style and full of bugs.
 
-The **Noob JSON Parser&Generator** is the refactor of the first version, aiming to make it more concise and robust. The name "Noob" means that the coder, which is myself, is totally a rookie in coding, not the code.
+The **Tinker JSON Parser&Generator** is the refactor of the first version, aiming to make it more concise and robust. The name "Tinker" is a nickname I like :)
 
 Finally I want to express my thanks to [@Milo Yip](https://github.com/miloyip), who writes such a good tutorial from which I learn so much.
 
@@ -39,7 +39,7 @@ The speed of serialization is not yet tested.
 
 ## Installation
 
-To compile the Noob JSON as dynamic library, you can make a `build` directory and enter it:
+To compile the Tinker JSON as dynamic library, you can make a `build` directory and enter it:
 
 ```
 mkdir build
@@ -61,27 +61,29 @@ Notice that you can use the parameter `-DCMAKE_INSTALL_PREFIX` to specify the de
 I provide a `test.cpp` to show compile and link the library to your project. To run the test, run the following commands:
 
 ```
-g++ -std=c++11 test.cpp -o test-case -lNoobJson
+g++ -std=c++11 test.cpp -o test-case -lTinkerJson
 ./test-case
 ```
 
 Below is a simple example on how to parse a JSON string into a document, and get the value of the nodes. Finally it will stringify the document tree and return a string.
 
 ```c++
-#include <noob-json/noob-value.h>
+#include <tinker-json/TinkerValue.h>
 
 #include <iostream>
 
+using namespace Tinker;
+
 int main() {
   const char* json = "{\"project\":\"NoobJson\",\"stars\":1}";
-  NoobValue v;
+  Value v;
   v.Parse(json);
 
-  const NoobValue &p = v["project"];
+  const Value &p = v["project"];
   std::cout << "Type: " << p.GetTypeString() << std::endl;
   std::cout << "Value: " << p.GetString() << std::endl;
 
-  const NoobValue &s = v["stars"];
+  const Value &s = v["stars"];
   std::cout << "Type: " << s.GetTypeString() << std::endl;
   std::cout << "Value: " << s.GetNumber() << std::endl;
   
