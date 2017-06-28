@@ -1,8 +1,8 @@
-# Tinker JSON Parser - C++ Version of Lept JSON Parser
+# Tinker JSON - C++ Version of Lept JSON Parser & Generator
 
 ## Version
 
-v 3.0.0
+v 3.0
 
 ## Build status
 
@@ -75,7 +75,7 @@ Below is a simple example on how to parse a JSON string into a document, and get
 using namespace Tinker;
 
 int main() {
-  const char* json = "{\"project\":\"NoobJson\",\"stars\":1}";
+  const char* json = "{\"project\":\"TinkerJson\",\"stars\":1}";
   Value v;
   v.Parse(json);
 
@@ -104,14 +104,14 @@ Result:
 
 ```
 Type: String
-Value: NoobJson
+Value: TinkerJson
 Type: Number
 Value: 1
-JSON Text: {"stars":1,"project":"NoobJson"}
+JSON Text: {"stars":1,"project":"TinkerJson"}
 Prettified JSON Text: 
 {
   "stars": 1,
-  "project": "NoobJson"
+  "project": "TinkerJson"
 }
 ```
 
